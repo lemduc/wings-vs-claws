@@ -1,6 +1,7 @@
 import { AGENTS, IAM_DIMENSIONS, IAM_MATRIX, VERDICT, SOURCES } from './data.js'
 import Simulator from './components/Simulator.jsx'
 import Architecture from './components/Architecture.jsx'
+import Game from './components/Game.jsx'
 
 function AgentCard({ id }) {
   const a = AGENTS[id]
@@ -47,6 +48,7 @@ export default function App() {
           <a className="link" href="#compare">compare</a>
           <a className="link" href="#matrix">controls</a>
           <a className="link" href="#architecture">topology</a>
+          <a className="link" href="#game">game</a>
           <a className="link" href="#verdict">verdict</a>
         </div>
       </nav>
@@ -133,6 +135,8 @@ export default function App() {
       </section>
 
       <Architecture />
+
+      <Game />
 
       <section id="verdict">
         <div className="wrap">

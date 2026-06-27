@@ -243,6 +243,23 @@ export const TRACES = {
   },
 }
 
+// "Defense in Depth" mini-game. Each threat is blocked by exactly one of the
+// 7 Hermes layers (1-based index into HERMES_LAYERS) — mapping follows the
+// documented mechanism that stops it.
+export const THREATS = [
+  { id: 't-stranger', icon: '👤', name: 'Unknown user', desc: 'a stranger DMs the agent and tells it to act', layer: 1 },
+  { id: 't-pairspam', icon: '📨', name: 'Pairing brute-force', desc: 'attacker spams pairing-code guesses', layer: 1 },
+  { id: 't-rmrf', icon: '☠️', name: 'Destructive command', desc: 'agent is told to run `rm -rf /`', layer: 2 },
+  { id: 't-forkbomb', icon: '💣', name: 'Fork bomb', desc: ':(){ :|:& };: aims to exhaust the host', layer: 2 },
+  { id: 't-hostread', icon: '📂', name: 'Host file read', desc: 'a tool tries to read /etc/shadow on the host', layer: 3 },
+  { id: 't-escape', icon: '🪟', name: 'Sandbox escape', desc: 'process attempts to break out to the host', layer: 3 },
+  { id: 't-exfil', icon: '🔑', name: 'Token exfiltration', desc: 'code reads $GITHUB_TOKEN and POSTs it out', layer: 4 },
+  { id: 't-leak', icon: '🩹', name: 'Secret in error', desc: 'a tool error would leak `sk-…` in plaintext', layer: 4 },
+  { id: 't-inject', icon: '🧬', name: 'Prompt injection', desc: 'hidden instructions buried in AGENTS.md', layer: 5 },
+  { id: 't-snoop', icon: '🕵️', name: 'Cross-session snoop', desc: 'one session tries to read another user’s data', layer: 6 },
+  { id: 't-traversal', icon: '🧭', name: 'Path traversal', desc: 'workdir set to ../../etc to escape the jail', layer: 7 },
+]
+
 export const VERDICT = {
   hermes:
     'Reach for Hermes’ model when the threat you care about is a compromised or ' +
