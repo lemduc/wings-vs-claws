@@ -41,12 +41,47 @@ body {
   color: var(--text);
   line-height: 1.6;
   font-size: 15px;
+  position: relative;
   background-color: var(--bg);
   background-image:
     linear-gradient(rgba(88, 166, 255, 0.04) 1px, transparent 1px),
     linear-gradient(90deg, rgba(240, 136, 62, 0.04) 1px, transparent 1px);
   background-size: 48px 48px;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Ambient aurora — two slow-drifting glow blobs (blue = Hermes, orange = Claw). */
+body::before {
+  content: '';
+  position: fixed;
+  inset: -25vmax;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(38vmax 38vmax at 18% 12%, rgba(88, 166, 255, 0.16), transparent 60%),
+    radial-gradient(40vmax 40vmax at 84% 22%, rgba(240, 136, 62, 0.14), transparent 60%),
+    radial-gradient(46vmax 46vmax at 60% 100%, rgba(188, 140, 255, 0.10), transparent 62%);
+  filter: blur(8px);
+  animation: aurora 32s ease-in-out infinite alternate;
+}
+@keyframes aurora {
+  0%   { transform: translate3d(-3%, -2%, 0) scale(1); }
+  50%  { transform: translate3d(2%, 3%, 0) scale(1.08); }
+  100% { transform: translate3d(3%, -3%, 0) scale(1.04); }
+}
+
+/* Vignette — darken the edges so foreground text keeps contrast. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 0%, transparent 55%, rgba(1, 4, 9, 0.55) 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none; }
 }
 
 a { color: var(--hermes); text-decoration: none; }
