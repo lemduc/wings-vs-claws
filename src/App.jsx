@@ -1,34 +1,37 @@
-import { AGENTS, COMPARISON, FEATURE_MATRIX, VERDICT, SOURCES } from './data.js'
+import { AGENTS, IAM_DIMENSIONS, IAM_MATRIX, VERDICT, SOURCES } from './data.js'
 import Simulator from './components/Simulator.jsx'
 import Architecture from './components/Architecture.jsx'
 
 function AgentCard({ id }) {
   const a = AGENTS[id]
   return (
-    <div className={`card-agent ${id}`}>
-      <div className="emoji">{a.symbol}</div>
-      <h3>{a.name}</h3>
-      <div className="tag">{a.tagline}</div>
-      <div className="motto">“{a.motto}”</div>
-      <div className="blurb">{a.blurb}</div>
-      <div className="meta-row">
-        <span className="pill">{a.creator}</span>
-        <span className="pill">{a.debut}</span>
-        <span className="pill">{a.license}</span>
-        <span className="pill">{a.version}</span>
+    <div className={`agentcard term ${id}`}>
+      <div className={`term-bar ${id}`}>
+        <span className="dot r" /><span className="dot y" /><span className="dot g" />
+        <span className="fname">{a.file}</span>
       </div>
-      <div className="card-links">
-        <a href={a.site} target="_blank" rel="noreferrer">Website ↗</a>
-        <a href={a.repo} target="_blank" rel="noreferrer">GitHub ↗</a>
+      <div className="term-body">
+        <h3>{a.symbol} {a.name}</h3>
+        <div className="model">IAM model: <b>{a.iamModel}</b></div>
+        <p className="motto">{a.motto}</p>
+        <p className="blurb">{a.blurb}</p>
+        <div className="kv">
+          <span>{a.creator}</span>
+          <span>{a.license}</span>
+        </div>
+        <div className="links">
+          <a href={a.site} target="_blank" rel="noreferrer">security docs ↗</a>
+          <a href={a.repo} target="_blank" rel="noreferrer">source ↗</a>
+        </div>
       </div>
     </div>
   )
 }
 
-function Mark({ value }) {
-  const map = { yes: ['✓', 'yes'], partial: ['◐', 'partial'], no: ['—', 'no'] }
+function Mark({ value, who }) {
+  const map = { yes: ['✓', 'yes'], partial: ['◐', 'partial'], no: ['✗', 'no'] }
   const [glyph, cls] = map[value] || map.no
-  return <span className={cls}>{glyph}</span>
+  return <span className={cls} data-who={who}>{glyph}</span>
 }
 
 export default function App() {
@@ -37,28 +40,33 @@ export default function App() {
       <nav className="nav">
         <div className="wrap nav-inner">
           <div className="brand">
-            Wings <span className="vs">vs</span> Claws
+            <span className="w">wings</span><span className="slash">/</span><span className="c">claws</span>
+            <span className="comment"> :: iam</span>
           </div>
-          <a className="link" href="#simulator">Simulator</a>
-          <a className="link" href="#compare">Compare</a>
-          <a className="link" href="#architecture">Architecture</a>
-          <a className="link" href="#verdict">Verdict</a>
+          <a className="link" href="#simulator">trace</a>
+          <a className="link" href="#compare">compare</a>
+          <a className="link" href="#matrix">controls</a>
+          <a className="link" href="#architecture">topology</a>
+          <a className="link" href="#verdict">verdict</a>
         </div>
       </nav>
 
       <header className="hero">
         <div className="wrap">
+          <div className="eyebrow">$ ./compare --topic=iam hermes openclaw</div>
           <h1>
-            <span className="h">Hermes Agent</span> vs <span className="c">OpenClaw</span>
+            <span className="w">Hermes Agent</span> <span className="vs">vs</span> <span className="c">OpenClaw</span>
+            <br />two agents, two IAM philosophies
           </h1>
           <p className="sub">
-            Two open-source autonomous agents, two very different philosophies. The winged,
-            self-improving researcher's agent — versus the clawed, local-first personal assistant.
-            Explore the difference interactively.
+            Both run as autonomous, tool-wielding processes on your infrastructure — which makes
+            them <span className="tok-orange">non-human identities</span> with real blast radius.
+            This is a source-grounded look at how each one handles{' '}
+            <span className="tok-blue">authentication, authorization, secrets, isolation, and delegation</span>.
+            Code-level, IAM-only.
           </p>
           <div className="split">
             <AgentCard id="hermes" />
-            <div className="vs-badge">VS</div>
             <AgentCard id="openclaw" />
           </div>
         </div>
@@ -69,52 +77,54 @@ export default function App() {
       <section id="compare">
         <div className="wrap">
           <div className="section-head">
-            <div className="eyebrow">Head to head</div>
-            <h2>Side by side</h2>
-            <p>Every cell below comes from the projects' official sites, docs, and repos.</p>
+            <div className="eyebrow">head to head</div>
+            <h2><span className="fn">diff</span><span className="pn"> hermes.iam openclaw.iam</span></h2>
+            <p>Eight IAM dimensions, side by side. Every cell traces to the projects' own security docs.</p>
           </div>
-          <table className="cmp">
-            <thead>
-              <tr>
-                <th></th>
-                <th className="th-h">🪽 Hermes Agent</th>
-                <th className="th-c">🦞 OpenClaw</th>
-              </tr>
-            </thead>
-            <tbody>
-              {COMPARISON.map((row) => (
-                <tr key={row.dimension}>
-                  <td className="dim">{row.dimension}</td>
-                  <td>{row.hermes}</td>
-                  <td>{row.openclaw}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="dims">
+            {IAM_DIMENSIONS.map((row) => (
+              <div className="dim" key={row.id}>
+                <div className="dim-head">
+                  <div className="name">{row.dimension}</div>
+                  <div className="sub">{row.sub}</div>
+                </div>
+                <div className="dim-cols">
+                  <div className="dim-col h">
+                    <div className="who">🪽 HERMES</div>
+                    {row.hermes}
+                  </div>
+                  <div className="dim-col c">
+                    <div className="who">🦞 OPENCLAW</div>
+                    {row.openclaw}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       <section id="matrix">
         <div className="wrap">
           <div className="section-head">
-            <div className="eyebrow">Capabilities</div>
-            <h2>Feature matrix</h2>
-            <p>✓ first-class · ◐ partial / possible · — not a focus</p>
+            <div className="eyebrow">controls</div>
+            <h2><span className="fn">capabilities</span><span className="pn">[]</span></h2>
+            <p>✓ first-class · ◐ partial / possible · ✗ not a focus — as documented (June 2026).</p>
           </div>
           <table className="matrix">
             <thead>
               <tr>
-                <th style={{ textAlign: 'left' }}>Capability</th>
-                <th>🪽 Hermes</th>
-                <th>🦞 OpenClaw</th>
+                <th className="l">IAM control</th>
+                <th className="h">🪽 Hermes</th>
+                <th className="c">🦞 OpenClaw</th>
               </tr>
             </thead>
             <tbody>
-              {FEATURE_MATRIX.map((r) => (
-                <tr key={r.feature}>
-                  <td className="feat">{r.feature}</td>
-                  <td className="mark"><Mark value={r.hermes} /></td>
-                  <td className="mark"><Mark value={r.openclaw} /></td>
+              {IAM_MATRIX.map((r) => (
+                <tr key={r.control}>
+                  <td className="feat">{r.control}</td>
+                  <td className="mark"><Mark value={r.hermes} who="Hermes" /></td>
+                  <td className="mark"><Mark value={r.openclaw} who="OpenClaw" /></td>
                 </tr>
               ))}
             </tbody>
@@ -127,18 +137,30 @@ export default function App() {
       <section id="verdict">
         <div className="wrap">
           <div className="section-head">
-            <div className="eyebrow">So which one?</div>
-            <h2>Which should you pick?</h2>
-            <p>They optimize for different people. Here's the short version.</p>
+            <div className="eyebrow">so which model?</div>
+            <h2><span className="fn">return</span><span className="pn"> recommendation</span></h2>
+            <p>They optimize for different threat models. The short version:</p>
           </div>
           <div className="verdict-grid">
-            <div className="verdict-card hermes">
-              <h4>🪽 Choose Hermes Agent</h4>
-              <p>{VERDICT.hermes}</p>
+            <div className="verdict-card term hermes">
+              <div className="term-bar">
+                <span className="dot r" /><span className="dot y" /><span className="dot g" />
+                <span className="fname">choose-hermes.md</span>
+              </div>
+              <div className="term-body">
+                <span className="ret">// when the threat is the agent itself</span>
+                {VERDICT.hermes}
+              </div>
             </div>
-            <div className="verdict-card openclaw">
-              <h4>🦞 Choose OpenClaw</h4>
-              <p>{VERDICT.openclaw}</p>
+            <div className="verdict-card term openclaw">
+              <div className="term-bar">
+                <span className="dot r" /><span className="dot y" /><span className="dot g" />
+                <span className="fname">choose-openclaw.md</span>
+              </div>
+              <div className="term-body">
+                <span className="ret">// when you want explicit IAM ergonomics</span>
+                {VERDICT.openclaw}
+              </div>
             </div>
           </div>
         </div>
@@ -146,7 +168,7 @@ export default function App() {
 
       <footer>
         <div className="wrap">
-          <h5>Sources</h5>
+          <h5>sources</h5>
           <ul>
             {SOURCES.map((s) => (
               <li key={s.url}>
@@ -155,11 +177,12 @@ export default function App() {
             ))}
           </ul>
           <p className="fine">
-            Wings vs Claws is an independent, unofficial comparison built for demonstration.
-            Not affiliated with Nous Research or the OpenClaw project. Factual claims are drawn
-            from the sources above (retrieved June 2026); the interactive simulator presents
-            illustrative traces of each project's documented architecture, not live runs.
-            Product details change quickly — check the official sites for the latest.
+            Wings/Claws :: iam is an independent, unofficial comparison built for demonstration —
+            not affiliated with Nous Research or the OpenClaw project. IAM claims are drawn from each
+            project's published security documentation (retrieved June 2026); the simulator presents
+            illustrative traces of documented mechanisms, not live runs or transcripts. Security
+            posture and defaults change quickly — verify against the official docs before relying on
+            any control here.
           </p>
         </div>
       </footer>

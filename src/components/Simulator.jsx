@@ -1,53 +1,59 @@
 import { useEffect, useRef, useState } from 'react'
-import { AGENTS, TASKS, TRACES } from '../data.js'
+import { AGENTS, SCENARIOS, TRACES } from '../data.js'
 
-// Maps a free-text custom task to the closest scripted trace, so the
-// "type your own" box always produces a sensible illustrative run.
-function pickTrace(text) {
+// Map free-text to the closest scripted IAM scenario.
+function pickScenario(text) {
   const t = text.toLowerCase()
-  if (/slack|email|message|reply|inbox|dm/.test(t)) return 'slack-triage'
-  if (/train|trajector|fine-?tune|rl|dataset|export/.test(t)) return 'rl-export'
-  if (/morning|daily|schedule|brief|every day|each day|remind/.test(t)) return 'morning-brief'
-  if (/research|browse|web|buy|shop|compare|summari/.test(t)) return 'browse-buy'
-  return 'slack-triage'
+  if (/dm|message|unknown|stranger|who|auth|login|pair/.test(t)) return 'unknown-dm'
+  if (/token|key|secret|credential|api|oauth|password/.test(t)) return 'github-token'
+  if (/rm |delete|danger|destroy|shell|sudo|format|wipe/.test(t)) return 'dangerous-cmd'
+  if (/subagent|delegate|spawn|child|sub-?task/.test(t)) return 'spawn-subagent'
+  return 'unknown-dm'
 }
 
-function Lane({ agent, steps, revealed }) {
+function Lane({ agent, lines, revealed }) {
   const a = AGENTS[agent]
   return (
-    <div className={`lane ${agent}`}>
-      <div className="lane-head">
-        <span className="emoji">{a.symbol}</span>
-        <div>
-          <h4>{a.name}</h4>
-          <div className="sub">{a.motto}</div>
-        </div>
+    <div className={`lane term ${agent}`}>
+      <div className="term-bar">
+        <span className="dot r" /><span className="dot y" /><span className="dot g" />
+        <span className="lbl">{a.symbol} {a.name}</span>
+        <span className="fname">{a.file}</span>
       </div>
-      {steps.length === 0 ? (
-        <div className="empty">Pick a task to see how {a.name} would approach it.</div>
-      ) : (
-        steps.map((s, i) => (
-          <div className={`step ${i < revealed ? 'show' : ''}`} key={i}>
-            <span className="dot">{i + 1}</span>
-            <div className="body">
-              <div className="label">{s.label}</div>
-              <div className="detail">{s.detail}</div>
+      <div className="term-body">
+        {lines.length === 0 ? (
+          <div className="empty">// select a scenario to trace {a.name}'s IAM path</div>
+        ) : (
+          <>
+            <div className="cmd prompt">
+              iam-trace --agent <span className="arg">{agent}</span>
             </div>
-          </div>
-        ))
-      )}
+            {lines.map((l, i) => (
+              <div className={`logline ${i < revealed ? 'show' : ''}`} key={i}>
+                <span className="tag">{l.tag}</span>
+                <span className="verb">{l.verb}</span>
+                <span className="txt">{l.line}</span>
+              </div>
+            ))}
+            {revealed >= lines.length ? (
+              <div className="done">✓ access decision resolved</div>
+            ) : (
+              <div className="done running">› tracing<span className="caret" /></div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   )
 }
 
 export default function Simulator() {
-  const [taskId, setTaskId] = useState(null)
+  const [scenarioId, setScenarioId] = useState(null)
   const [custom, setCustom] = useState('')
   const [revealed, setRevealed] = useState(0)
   const timers = useRef([])
 
-  const trace = taskId ? TRACES[taskId] : null
-  const maxSteps = trace ? Math.max(trace.hermes.length, trace.openclaw.length) : 0
+  const trace = scenarioId ? TRACES[scenarioId] : null
 
   function clearTimers() {
     timers.current.forEach((t) => clearTimeout(t))
@@ -56,11 +62,11 @@ export default function Simulator() {
 
   function run(id) {
     clearTimers()
-    setTaskId(id)
+    setScenarioId(id)
     setRevealed(0)
     const steps = Math.max(TRACES[id].hermes.length, TRACES[id].openclaw.length)
     for (let i = 1; i <= steps; i++) {
-      timers.current.push(setTimeout(() => setRevealed(i), i * 520))
+      timers.current.push(setTimeout(() => setRevealed(i), i * 480))
     }
   }
 
@@ -70,23 +76,23 @@ export default function Simulator() {
     <section id="simulator">
       <div className="wrap">
         <div className="section-head">
-          <div className="eyebrow">Interactive</div>
-          <h2>Run the same task through both</h2>
+          <div className="eyebrow">interactive</div>
+          <h2><span className="fn">traceAccess</span><span className="pn">(scenario)</span></h2>
           <p>
-            Pick a task — or type your own — and watch each agent's documented architecture
-            light up step by step.
+            Pick an access scenario — or describe your own — and watch each agent's
+            documented IAM controls gate it, layer by layer.
           </p>
         </div>
 
         <div className="sim-tasks">
-          {TASKS.map((t) => (
+          {SCENARIOS.map((s, i) => (
             <button
-              key={t.id}
-              className={`task-btn ${taskId === t.id ? 'active' : ''}`}
-              onClick={() => run(t.id)}
+              key={s.id}
+              className={`task-btn ${scenarioId === s.id ? 'active' : ''}`}
+              onClick={() => run(s.id)}
             >
-              <span className="ti">{t.icon}</span>
-              <span>{t.title}</span>
+              <span className="ti">{s.icon}</span>
+              <span><span className="k">{i}: </span>{s.title}</span>
             </button>
           ))}
         </div>
@@ -95,29 +101,28 @@ export default function Simulator() {
           className="custom-row"
           onSubmit={(e) => {
             e.preventDefault()
-            if (custom.trim()) run(pickTrace(custom))
+            if (custom.trim()) run(pickScenario(custom))
           }}
         >
-          <input
-            value={custom}
-            onChange={(e) => setCustom(e.target.value)}
-            placeholder="…or describe your own task, e.g. “summarize my unread email”"
-            aria-label="Custom task"
-          />
-          <button className="btn" type="submit" disabled={!custom.trim()}>
-            Simulate
-          </button>
+          <div className="inwrap">
+            <input
+              value={custom}
+              onChange={(e) => setCustom(e.target.value)}
+              placeholder="describe an access scenario, e.g. “agent needs my AWS keys”"
+              aria-label="Custom scenario"
+            />
+          </div>
+          <button className="btn" type="submit" disabled={!custom.trim()}>trace ↵</button>
         </form>
 
         <div className="lanes">
-          <Lane agent="hermes" steps={trace ? trace.hermes : []} revealed={revealed} />
-          <Lane agent="openclaw" steps={trace ? trace.openclaw : []} revealed={revealed} />
+          <Lane agent="hermes" lines={trace ? trace.hermes : []} revealed={revealed} />
+          <Lane agent="openclaw" lines={trace ? trace.openclaw : []} revealed={revealed} />
         </div>
 
         {trace && (
           <div className="disclaimer">
-            Illustrative simulation — these traces dramatize each project's documented
-            architecture, not a live run. {revealed < maxSteps ? 'Running…' : 'Done.'}
+            illustrative trace — each line dramatizes a documented IAM mechanism, not a live run
           </div>
         )}
       </div>

@@ -1,224 +1,263 @@
-// All factual content lives here so every claim is traceable to a source.
-// Sources (fetched June 2026):
-//   - https://hermes-agent.nousresearch.com/  (Hermes Agent official site)
-//   - https://github.com/nousresearch/hermes-agent
-//   - https://openclawagent.net/  (OpenClaw resources hub)
-//   - https://github.com/openclaw  (OpenClaw GitHub org)
-// The Simulator "traces" below are ILLUSTRATIVE: they dramatize each project's
-// real, documented architecture. They are not live runs and not transcripts.
+// ============================================================================
+// Wings vs Claws — an IAM-focused comparison of two open-source agents.
+// Every claim below is traceable to the projects' own security docs + guides.
+//
+// Sources (retrieved June 2026):
+//   Hermes:   https://hermes-agent.nousresearch.com/docs/user-guide/security
+//             https://github.com/NousResearch/hermes-agent/blob/main/SECURITY.md
+//   OpenClaw: https://docs.openclaw.ai/gateway/security
+//             https://docs.openclaw.ai/gateway/sandboxing
+//
+// Scope: Identity & Access Management ONLY — authN, authZ/RBAC, tool
+// permissions, secrets, isolation, delegation, audit, default posture.
+// The "access traces" in the simulator dramatize each project's DOCUMENTED
+// IAM mechanisms applied to a scenario. They are illustrative, not live runs.
+// ============================================================================
 
 export const AGENTS = {
   hermes: {
     id: 'hermes',
     name: 'Hermes Agent',
-    tagline: 'The agent that grows with you',
+    file: 'hermes.iam',
     symbol: '🪽',
-    symbolLabel: 'Winged',
     creator: 'Nous Research',
-    debut: 'February 2026',
     license: 'MIT',
-    version: 'v0.17.0',
-    site: 'https://hermes-agent.nousresearch.com/',
-    repo: 'https://github.com/nousresearch/hermes-agent',
-    motto: 'One agent, one memory, every surface.',
+    iamModel: '7-layer defense-in-depth',
+    motto: 'Deny by default, contain by design.',
     blurb:
-      'A self-improving autonomous agent that lives on your infrastructure, ' +
-      'remembers what it learns across sessions, and gets more capable the longer it runs.',
+      'Layered, container-centric IAM: the sandbox is the security boundary, ' +
+      'secrets are stripped from subprocesses unless explicitly declared, and ' +
+      'dangerous actions are gated by human-in-the-loop approval.',
+    site: 'https://hermes-agent.nousresearch.com/docs/user-guide/security',
+    repo: 'https://github.com/NousResearch/hermes-agent/blob/main/SECURITY.md',
   },
   openclaw: {
     id: 'openclaw',
     name: 'OpenClaw',
-    tagline: 'Your local-first personal AI assistant',
+    file: 'openclaw.iam',
     symbol: '🦞',
-    symbolLabel: 'Clawed',
     creator: 'Peter Steinberger',
-    debut: 'Late 2025',
-    license: 'Open source (GitHub org)',
-    version: '200k+ GitHub stars',
-    site: 'https://openclawagent.net/',
-    repo: 'https://github.com/openclaw',
-    motto: 'Gateway → agent → subagents, on your own hardware.',
+    license: 'Open source',
+    iamModel: 'Gateway RBAC + 3 permission gates',
+    motto: 'One trusted operator, least privilege, widen on confidence.',
     blurb:
-      'A local-first personal assistant that turns natural-language instructions into ' +
-      'real device-level actions, running continuously on hardware you control.',
+      'Role-based IAM around a single operator boundary: the agent is a ' +
+      'non-human principal, gated by three independent permission layers, ' +
+      'with secrets behind SecretRef providers injected at runtime.',
+    site: 'https://docs.openclaw.ai/gateway/security',
+    repo: 'https://docs.openclaw.ai/gateway/sandboxing',
   },
 }
 
-// Side-by-side comparison rows. Each cell is sourced from the official material.
-export const COMPARISON = [
+// IAM comparison rows — each cell sourced from the official security docs.
+export const IAM_DIMENSIONS = [
   {
-    dimension: 'Origin',
-    hermes: 'Nous Research, debuted Feb 2026',
-    openclaw: 'Peter Steinberger, launched late 2025',
+    id: 'authn',
+    dimension: 'Authentication',
+    sub: 'Who is allowed to talk to the agent at all',
+    hermes:
+      'Gateway checks a strict order: per-platform allow-all → DM-pairing list → platform allowlist → global allowlist → global allow-all → deny. DM pairing issues an 8-char code (1h TTL, rate-limited, 5 fails → 1h lockout, file chmod 0600).',
+    openclaw:
+      'Gateway auth modes: token, password, or trusted-proxy identity. New senders must approve a pairing code (1h TTL, max 3 pending), or use a strict allowlist; "open" requires an explicit "*" opt-in.',
   },
   {
-    dimension: 'License',
-    hermes: 'MIT (v0.17.0)',
-    openclaw: 'Open source via OpenClaw GitHub org',
+    id: 'authz',
+    dimension: 'Authorization model',
+    sub: 'How rights are structured once authenticated',
+    hermes:
+      'Allowlist-based; effectively owner-vs-user. No formal role tiers — authority is expressed through who is on which allowlist.',
+    openclaw:
+      'Explicit role-based access: operator vs non-operator. Per-group allowlists (groupAllowFrom) and dmScope:"per-channel-peer" isolate context per sender.',
   },
   {
-    dimension: 'Core idea',
-    hermes: 'Self-improving agent with persistent memory — "one agent, one memory, every surface"',
-    openclaw: 'Local-first assistant that executes real actions on your devices',
+    id: 'tools',
+    dimension: 'Tool / action permissions',
+    sub: "The principal's blast radius",
+    hermes:
+      'Dangerous-command approval modes: manual (default, always prompt), smart (LLM risk score → auto allow/deny), off (--yolo). A hardline blocklist (rm -rf /, fork bombs, disk format) is refused even under --yolo.',
+    openclaw:
+      'Three independent permission gates: agent-level tool allow/deny, sandbox-level tool filter, and container network access — all must permit an action. Default "messaging" profile disables automation/runtime/fs groups; tools.elevated bypass is off by default.',
   },
   {
-    dimension: 'Architecture',
-    hermes: 'Single agent + persistent memory; delegates to isolated subagents',
-    openclaw: 'Gateway control plane → primary agent → subagents',
+    id: 'secrets',
+    dimension: 'Secrets & credentials',
+    sub: 'How API keys and tokens are handled',
+    hermes:
+      'MCP subprocesses receive only safe vars (PATH, HOME, USER, LANG, TERM, SHELL, TMPDIR, XDG_*); everything with KEY/TOKEN/SECRET/PASSWORD is stripped. Skills declare required_environment_variables / required_credential_files; files mount read-only. Errors redact ghp_…, sk-…, bearer tokens.',
+    openclaw:
+      'Secrets live in ~/.openclaw/credentials/ or behind SecretRef providers (env / file / exec), injected at runtime — never in config files. Untrusted workspace .env files cannot override OPENCLAW_* or provider credentials.',
   },
   {
-    dimension: 'Memory model',
-    hermes: 'Persistent across every session — learns projects, preferences, environment',
-    openclaw: 'Session + skill state managed by the gateway',
+    id: 'isolation',
+    dimension: 'Execution isolation',
+    sub: 'Sandboxing & resource boundaries',
+    hermes:
+      'Hardened containers: --cap-drop ALL, --security-opt no-new-privileges, --pids-limit 256, tmpfs /tmp with nosuid. Backends: local / ssh / docker / singularity / modal. SSRF guard blocks RFC-1918, loopback, link-local, and cloud-metadata addresses.',
+    openclaw:
+      'Sandbox scope: agent / session / shared. Workspace access: none / ro / rw. Host target: sandbox (Docker) / gateway (host) / node (remote). Docker network is disabled by default, so even allowed web tools fail until opened.',
   },
   {
-    dimension: 'Skills',
-    hermes: 'Self-writes reusable skills (agentskills.io standard); searchable & shareable',
-    openclaw: 'ClawHub marketplace — 500+ community skills',
+    id: 'principal',
+    dimension: 'Agent as principal',
+    sub: 'Treating the agent as a non-human identity',
+    hermes:
+      'Implicit: identity is enforced through the 7 layers (authorization, approval, isolation, credential filtering, scanning, session isolation, sanitization) rather than a named principal object.',
+    openclaw:
+      'Explicit: the agent is documented as "a new security principal on your system — a non-human identity that can take actions, touch data, and move across systems."',
   },
   {
-    dimension: 'Proactivity',
-    hermes: 'Natural-language scheduling for automation',
-    openclaw: 'Heartbeat mechanism for scheduled polling cycles',
+    id: 'delegation',
+    dimension: 'Subagent delegation',
+    sub: 'How spawned subagents inherit rights',
+    hermes:
+      'Sessions cannot access each other\'s data or state. Cron/storage paths are hardened against traversal; working-dir params are validated against an allowlist. Subprocesses inherit only the filtered env.',
+    openclaw:
+      'Delegation requires explicit permission. Children inherit the parent sandbox mode unless overridden (sandbox:"require" fails if the target isn\'t sandboxed). visibility: self | tree | agent | all bounds which sessions a subagent can read.',
   },
   {
-    dimension: 'Execution backends',
-    hermes: 'Local, Docker, SSH, Singularity, Modal (namespace isolation)',
-    openclaw: 'User-controlled hardware; Node.js; browser control',
+    id: 'audit',
+    dimension: 'Audit & redaction',
+    sub: 'Visibility and forensics',
+    hermes:
+      'Credential redaction in tool errors, supply-chain advisory checks at startup and in `hermes doctor`, SHA-256-verified pre-exec scanning (Tirith), context-file injection scanning.',
+    openclaw:
+      '`openclaw security audit` reviews inbound policies, tool blast radius, filesystem perms, network exposure, and skill supply chain. logging.redactSensitive masks secrets in logs and transcripts by default.',
   },
   {
-    dimension: 'Messaging surfaces',
-    hermes: 'Telegram, Discord, Slack, WhatsApp, Signal, Email, CLI',
-    openclaw: 'WhatsApp, Telegram, Slack, Discord, Lark/Feishu, WeCom + CN apps',
-  },
-  {
-    dimension: 'Models',
-    hermes: 'Multi-model reasoning across 300+ models',
-    openclaw: 'LLM-agnostic; bring your own model',
-  },
-  {
-    dimension: 'Standout use case',
-    hermes: 'Generating RL training trajectories & exporting for fine-tuning',
-    openclaw: 'A privacy-preserving personal assistant across your messaging apps',
+    id: 'posture',
+    dimension: 'Default posture',
+    sub: 'Where the design optimizes',
+    hermes:
+      'Defense-in-depth with manual approval on by default; when a container backend is used, command checks defer to the container as the boundary.',
+    openclaw:
+      'Personal-assistant first: "one trusted operator boundary per gateway." Multi-tenant hostile isolation is explicitly out of scope — mixed-trust setups should use separate gateways, credentials, and OS users.',
   },
 ]
 
-// Feature presence matrix (✓ / partial / —), kept conservative to the sources.
-export const FEATURE_MATRIX = [
-  { feature: 'Persistent cross-session memory', hermes: 'yes', openclaw: 'partial' },
-  { feature: 'Self-authored / self-improving skills', hermes: 'yes', openclaw: 'partial' },
-  { feature: 'Community skill marketplace', hermes: 'partial', openclaw: 'yes' },
-  { feature: 'Subagent delegation', hermes: 'yes', openclaw: 'yes' },
-  { feature: 'Proactive / scheduled execution', hermes: 'yes', openclaw: 'yes' },
-  { feature: 'Browser automation & vision', hermes: 'yes', openclaw: 'yes' },
-  { feature: 'Multi-model routing (300+)', hermes: 'yes', openclaw: 'partial' },
-  { feature: 'Voice / wake-word talk mode', hermes: 'partial', openclaw: 'yes' },
-  { feature: 'RL trajectory export for fine-tuning', hermes: 'yes', openclaw: 'no' },
-  { feature: 'Local-first / self-hosted', hermes: 'yes', openclaw: 'yes' },
+// IAM control matrix (✓ first-class · ◐ partial/possible · — not a focus)
+export const IAM_MATRIX = [
+  { control: 'DM-pairing / allowlist authentication', hermes: 'yes', openclaw: 'yes' },
+  { control: 'Role-based access (operator vs user)', hermes: 'partial', openclaw: 'yes' },
+  { control: 'Human-in-the-loop command approval', hermes: 'yes', openclaw: 'partial' },
+  { control: 'Env-var secret stripping from subprocess', hermes: 'yes', openclaw: 'partial' },
+  { control: 'SecretRef / vault runtime injection', hermes: 'partial', openclaw: 'yes' },
+  { control: 'Hardened container flags (cap-drop, no-new-privs)', hermes: 'yes', openclaw: 'partial' },
+  { control: 'SSRF / egress network protection', hermes: 'yes', openclaw: 'partial' },
+  { control: 'Per-subagent visibility scoping', hermes: 'partial', openclaw: 'yes' },
+  { control: 'Built-in security-audit command', hermes: 'partial', openclaw: 'yes' },
+  { control: 'Cross-session / context isolation', hermes: 'yes', openclaw: 'yes' },
+  { control: 'Secret redaction in logs & errors', hermes: 'yes', openclaw: 'yes' },
 ]
 
-// Illustrative step traces for the simulator. Each task has a script per agent.
-// steps[].label = short stage name; steps[].detail = what that agent does.
-// Grounded in documented architecture, NOT a live run.
-export const TASKS = [
-  {
-    id: 'slack-triage',
-    title: 'Triage my unread Slack and draft replies',
-    icon: '💬',
-  },
-  {
-    id: 'rl-export',
-    title: 'Generate 1,000 tool-calling trajectories for fine-tuning',
-    icon: '🧪',
-  },
-  {
-    id: 'morning-brief',
-    title: 'Every morning, brief me on calendar + news',
-    icon: '🌅',
-  },
-  {
-    id: 'browse-buy',
-    title: 'Research a product across the web and summarize',
-    icon: '🔎',
-  },
+// Hermes 7-layer model (for the architecture panel)
+export const HERMES_LAYERS = [
+  'User authorization (allowlists + DM pairing)',
+  'Dangerous-command approval (manual / smart / off)',
+  'Container isolation (docker / singularity / modal)',
+  'MCP credential filtering (strip secrets from env)',
+  'Context-file scanning (prompt-injection detection)',
+  'Cross-session isolation (no shared state, no traversal)',
+  'Input sanitization (workdir allowlist validation)',
+]
+
+// OpenClaw gate model (for the architecture panel)
+export const OPENCLAW_GATES = [
+  { gate: 'Gateway', detail: 'AuthN (token / password / proxy) + operator role' },
+  { gate: 'Agent tool policy', detail: 'allow / deny per tool group' },
+  { gate: 'Sandbox filter', detail: 'independent tool allowlist + scope' },
+  { gate: 'Network', detail: 'egress off by default per container' },
+]
+
+// Simulator: IAM access scenarios. Each trace line dramatizes a real,
+// documented control. tag = the IAM layer; line = what happens.
+export const SCENARIOS = [
+  { id: 'unknown-dm', title: 'An unknown user DMs the agent', icon: '👤' },
+  { id: 'github-token', title: 'A task needs a GitHub token', icon: '🔑' },
+  { id: 'dangerous-cmd', title: 'The agent tries to run `rm -rf /`', icon: '☠️' },
+  { id: 'spawn-subagent', title: 'A subagent is spawned for a subtask', icon: '🌿' },
 ]
 
 export const TRACES = {
-  'slack-triage': {
+  'unknown-dm': {
     hermes: [
-      { label: 'Recall', detail: 'Loads persistent memory: who you Slack with, your tone, past threads.' },
-      { label: 'Connect', detail: 'Reads unread via the Slack surface — same agent, same memory.' },
-      { label: 'Reason', detail: 'Routes each thread to an appropriate model from 300+ available.' },
-      { label: 'Skill', detail: 'Reuses a self-written "reply-in-my-voice" skill from a past session.' },
-      { label: 'Draft', detail: 'Returns drafts; remembers your edits to get better next time.' },
+      { tag: 'authz', verb: 'CHECK', line: 'sender not on any allowlist → deny-by-default' },
+      { tag: 'pairing', verb: 'ISSUE', line: '8-char code · 32-char unambiguous alphabet · 1h TTL' },
+      { tag: 'ratelimit', verb: 'GUARD', line: '1 req / 10min · max 3 pending · 5 fails → 1h lockout' },
+      { tag: 'approve', verb: 'AWAIT', line: 'owner runs `hermes pairing approve <platform> <code>`' },
+      { tag: 'persist', verb: 'GRANT', line: 'authorized list written, file mode chmod 0600' },
     ],
     openclaw: [
-      { label: 'Gateway', detail: 'Gateway control plane receives the request, opens a session.' },
-      { label: 'Agent', detail: 'Primary agent connects the Slack channel integration.' },
-      { label: 'Subagent', detail: 'Spawns a subagent to classify threads by priority.' },
-      { label: 'Skill', detail: 'Pulls a reply-drafting skill from the ClawHub marketplace.' },
-      { label: 'Execute', detail: 'Drafts locally on your hardware — nothing leaves your control.' },
+      { tag: 'authn', verb: 'GATE', line: 'gateway auth: token / password / trusted-proxy' },
+      { tag: 'pairing', verb: 'ISSUE', line: 'new sender approves pairing code · 1h TTL · max 3 pending' },
+      { tag: 'policy', verb: 'MATCH', line: 'else strict allowlist; "open" needs explicit "*" opt-in' },
+      { tag: 'scope', verb: 'ISOLATE', line: 'dmScope="per-channel-peer" → context not shared' },
+      { tag: 'role', verb: 'ASSIGN', line: 'sender = non-operator → operator-only tools stay denied' },
     ],
   },
-  'rl-export': {
+  'github-token': {
     hermes: [
-      { label: 'Fan out', detail: 'Spawns thousands of isolated subagent conversations in parallel.' },
-      { label: 'Backends', detail: 'Runs across Docker / SSH / Modal with namespace isolation.' },
-      { label: 'Checkpoint', detail: 'Automatic checkpointing as trajectories are generated.' },
-      { label: 'Export', detail: 'Exports tool-calling trajectories ready for RL fine-tuning.' },
-      { label: 'Learn', detail: 'Distills successful runs into new reusable skills.' },
+      { tag: 'filter', verb: 'STRIP', line: 'subprocess env: only PATH/HOME/USER/LANG/TERM/… survive' },
+      { tag: 'declare', verb: 'DECLARE', line: 'skill frontmatter: required_environment_variables: [GITHUB_TOKEN]' },
+      { tag: 'inject', verb: 'PASS', line: 'registered passthrough → terminal / execute_code / docker / modal' },
+      { tag: 'mount', verb: 'MOUNT', line: 'required_credential_files bind-mounted read-only' },
+      { tag: 'redact', verb: 'SCRUB', line: 'errors mask ghp_… / sk-… / bearer → [REDACTED]' },
     ],
     openclaw: [
-      { label: 'Scope', detail: 'Built as a personal assistant — bulk trajectory export is out of its lane.' },
-      { label: 'Workaround', detail: 'You could script subagents, but there is no native export pipeline.' },
-      { label: 'Verdict', detail: 'This is where Hermes is purpose-built and OpenClaw is not.' },
+      { tag: 'store', verb: 'RESOLVE', line: 'SecretRef provider (env / file / exec) or ~/.openclaw/credentials/' },
+      { tag: 'block', verb: 'REJECT', line: 'workspace .env cannot override OPENCLAW_* / provider creds' },
+      { tag: 'inject', verb: 'INJECT', line: 'value injected at runtime — never written to config files' },
+      { tag: 'gate', verb: 'CHECK', line: 'sandbox tool filter must also permit the consuming tool' },
+      { tag: 'redact', verb: 'MASK', line: 'logging.redactSensitive hides token in logs + transcripts' },
     ],
   },
-  'morning-brief': {
+  'dangerous-cmd': {
     hermes: [
-      { label: 'Schedule', detail: 'You say "every morning brief me" in natural language — it schedules itself.' },
-      { label: 'Recall', detail: 'Knows your calendar, interests, and preferred briefing length from memory.' },
-      { label: 'Gather', detail: 'Web search + browsing pull fresh news; calendar surface adds your day.' },
-      { label: 'Deliver', detail: 'Sends the brief to whichever surface you chose (Telegram, email, CLI…).' },
+      { tag: 'approve', verb: 'PROMPT', line: 'mode=manual (default) → human-in-the-loop confirmation' },
+      { tag: 'smart', verb: 'SCORE', line: 'mode=smart: aux LLM scores risk → dangerous auto-denied' },
+      { tag: 'hardline', verb: 'REFUSE', line: 'rm -rf /, fork bombs, disk-format blocked even under --yolo' },
+      { tag: 'boundary', verb: 'DEFER', line: 'on docker/modal, cmd-check defers — container IS the boundary' },
+      { tag: 'contain', verb: 'CONFINE', line: '--cap-drop ALL · no-new-privileges · pids-limit · tmpfs nosuid' },
     ],
     openclaw: [
-      { label: 'Heartbeat', detail: 'The heartbeat mechanism wakes the agent on a scheduled polling cycle.' },
-      { label: 'Skills', detail: 'Calendar + news skills (from ClawHub) run as modular routines.' },
-      { label: 'Gather', detail: 'Browser control fetches news; local calendar skill reads your day.' },
-      { label: 'Deliver', detail: 'Pushes the brief to your messaging app of choice.' },
+      { tag: 'gate-1', verb: 'CHECK', line: 'agent tool policy: is the shell tool allowed for this agent?' },
+      { tag: 'gate-2', verb: 'CHECK', line: 'sandbox filter must independently permit the same tool' },
+      { tag: 'gate-3', verb: 'CHECK', line: 'container network off by default → egress blocked' },
+      { tag: 'default', verb: 'DENY', line: '"messaging" profile disables group:automation/runtime/fs' },
+      { tag: 'elevated', verb: 'BLOCK', line: 'tools.elevated bypass is off unless explicitly allowlisted' },
     ],
   },
-  'browse-buy': {
+  'spawn-subagent': {
     hermes: [
-      { label: 'Plan', detail: 'Picks a reasoning model suited to research from the 300+ pool.' },
-      { label: 'Browse', detail: 'Built-in browser automation + vision read product pages.' },
-      { label: 'Synthesize', detail: 'Summarizes; saves a "product-research" skill for next time.' },
-      { label: 'Remember', detail: 'Stores your preferences so future research is pre-tuned to you.' },
+      { tag: 'isolate', verb: 'WALL', line: 'sessions cannot read each other\'s data or state' },
+      { tag: 'path', verb: 'HARDEN', line: 'cron / storage paths hardened against traversal' },
+      { tag: 'validate', verb: 'CHECK', line: 'working-dir params validated against an allowlist' },
+      { tag: 'creds', verb: 'REGATE', line: 'child inherits only filtered env; secrets re-declared per skill' },
     ],
     openclaw: [
-      { label: 'Agent', detail: 'Primary agent takes the task from the gateway.' },
-      { label: 'Browse', detail: 'Browser-control skill navigates and scrapes the relevant pages.' },
-      { label: 'Subagent', detail: 'Delegates per-source reading to subagents, then merges.' },
-      { label: 'Summarize', detail: 'Returns a summary; runs entirely on your own machine.' },
+      { tag: 'delegate', verb: 'REQUIRE', line: 'delegation requires explicit permission' },
+      { tag: 'inherit', verb: 'INHERIT', line: 'child inherits parent sandbox mode unless overridden' },
+      { tag: 'require', verb: 'ENFORCE', line: 'sandbox:"require" fails if the target is not sandboxed' },
+      { tag: 'visibility', verb: 'SCOPE', line: 'visibility: self | tree | agent | all bounds session access' },
     ],
   },
 }
 
 export const VERDICT = {
   hermes:
-    'Pick Hermes if you want an agent that compounds — persistent memory, self-written ' +
-    'skills, multi-model routing, and a real pipeline for generating RL training data. ' +
-    'It is the better fit for builders, researchers, and power users.',
+    'Reach for Hermes’ model when the threat you care about is a compromised or ' +
+    'over-eager agent process: defense-in-depth, secrets stripped at the subprocess ' +
+    'boundary, hardened containers, and human-in-the-loop approval make the blast ' +
+    'radius small even if the model misbehaves. Identity is enforced by layers.',
   openclaw:
-    'Pick OpenClaw if you want a privacy-first personal assistant that lives on your own ' +
-    'hardware and acts across all your messaging apps, with a large community skill ' +
-    'marketplace and a proactive heartbeat. It is the better fit for everyday automation.',
+    'Reach for OpenClaw’s model when you want explicit IAM ergonomics around a ' +
+    'single operator: named operator-vs-non-operator roles, three composable ' +
+    'permission gates, SecretRef providers, and a built-in `security audit`. It is ' +
+    'least-privilege-by-config — just remember multi-tenant hostile isolation is out of scope.',
 }
 
 export const SOURCES = [
-  { label: 'Hermes Agent — official site', url: 'https://hermes-agent.nousresearch.com/' },
-  { label: 'Hermes Agent — GitHub', url: 'https://github.com/nousresearch/hermes-agent' },
-  { label: 'Hermes Agent — docs', url: 'https://hermes-agent.nousresearch.com/docs/' },
-  { label: 'OpenClaw — resources hub', url: 'https://openclawagent.net/' },
-  { label: 'OpenClaw — GitHub org', url: 'https://github.com/openclaw' },
+  { label: 'Hermes Agent — Security docs', url: 'https://hermes-agent.nousresearch.com/docs/user-guide/security' },
+  { label: 'Hermes Agent — SECURITY.md', url: 'https://github.com/NousResearch/hermes-agent/blob/main/SECURITY.md' },
+  { label: 'OpenClaw — Gateway Security', url: 'https://docs.openclaw.ai/gateway/security' },
+  { label: 'OpenClaw — Sandboxing', url: 'https://docs.openclaw.ai/gateway/sandboxing' },
 ]

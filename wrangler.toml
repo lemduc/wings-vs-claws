@@ -1,0 +1,5 @@
+# Cloudflare Pages config for `wrangler pages deploy`.
+# Static Vite build — no Workers runtime needed.
+name = "wings-vs-claws"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-06-27"
