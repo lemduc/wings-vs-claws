@@ -149,23 +149,24 @@ export const IAM_MATRIX = [
   { control: 'Secret redaction in logs & errors', hermes: 'yes', openclaw: 'yes' },
 ]
 
-// Hermes 7-layer model (for the architecture panel)
+// Hermes 7-layer model (for the architecture diagram). short = label shown
+// inside the diagram layer; full = the one-line detail in the legend.
 export const HERMES_LAYERS = [
-  'User authorization (allowlists + DM pairing)',
-  'Dangerous-command approval (manual / smart / off)',
-  'Container isolation (docker / singularity / modal)',
-  'MCP credential filtering (strip secrets from env)',
-  'Context-file scanning (prompt-injection detection)',
-  'Cross-session isolation (no shared state, no traversal)',
-  'Input sanitization (workdir allowlist validation)',
+  { short: 'User authorization', full: 'allowlists + DM pairing' },
+  { short: 'Command approval', full: 'manual / smart / off' },
+  { short: 'Container isolation', full: 'docker / singularity / modal' },
+  { short: 'Credential filtering', full: 'strip secrets from subprocess env' },
+  { short: 'Context scanning', full: 'prompt-injection detection' },
+  { short: 'Session isolation', full: 'no shared state, no traversal' },
+  { short: 'Input sanitization', full: 'working-dir allowlist validation' },
 ]
 
-// OpenClaw gate model (for the architecture panel)
+// OpenClaw gate model (for the architecture diagram). Sequential AND-chain.
 export const OPENCLAW_GATES = [
-  { gate: 'Gateway', detail: 'AuthN (token / password / proxy) + operator role' },
-  { gate: 'Agent tool policy', detail: 'allow / deny per tool group' },
-  { gate: 'Sandbox filter', detail: 'independent tool allowlist + scope' },
-  { gate: 'Network', detail: 'egress off by default per container' },
+  { gate: 'Gateway', detail: 'authN + operator role' },
+  { gate: 'Agent tool policy', detail: 'allow / deny per tool' },
+  { gate: 'Sandbox filter', detail: 'independent allowlist + scope' },
+  { gate: 'Network', detail: 'egress off by default' },
 ]
 
 // Simulator: IAM access scenarios. Each trace line dramatizes a real,

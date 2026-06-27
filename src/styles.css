@@ -236,13 +236,15 @@ section { padding: 52px 0; border-top: 1px solid var(--border-soft); }
 
 /* ---------- Architecture ---------- */
 .arch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.layer { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 7px; background: var(--bg-soft); font-size: 12.5px; }
-.layer .n { flex: none; width: 22px; height: 22px; border-radius: 5px; display: grid; place-items: center; font-size: 11px; font-weight: 700; border: 1px solid var(--hermes); color: var(--hermes); }
-.gate { border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; margin-bottom: 9px; background: var(--bg-soft); position: relative; }
-.gate .g { color: var(--claw); font-weight: 700; font-size: 13px; }
-.gate .d { color: var(--muted); font-size: 12px; }
-.gate:not(:last-child)::after { content: '↓'; position: absolute; left: 50%; bottom: -16px; transform: translateX(-50%); color: var(--faint); font-size: 12px; z-index: 1; }
-.gate-deny { text-align: center; color: var(--green); font-size: 12px; margin-top: 18px; }
+.arch-grid svg { display: block; }
+.legend { margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--border); display: flex; flex-direction: column; gap: 7px; }
+.leg { display: grid; grid-template-columns: 20px minmax(0, auto) 1fr; gap: 9px; align-items: baseline; font-size: 12px; }
+.leg .n { width: 18px; height: 18px; border-radius: 4px; display: grid; place-items: center; font-size: 10px; font-weight: 700; }
+.leg .n.h { border: 1px solid var(--hermes); color: var(--hermes); }
+.leg .n.c { border: 1px solid var(--claw); color: var(--claw); }
+.leg .lt { color: var(--text); white-space: nowrap; }
+.leg .lf { color: var(--faint); }
+.leg .lf::before { content: '// '; }
 
 /* ---------- Verdict ---------- */
 .verdict-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
