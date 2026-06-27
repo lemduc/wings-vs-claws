@@ -2,6 +2,13 @@ import { AGENTS, IAM_DIMENSIONS, IAM_MATRIX, VERDICT, SOURCES } from './data.js'
 import Simulator from './components/Simulator.jsx'
 import Architecture from './components/Architecture.jsx'
 import Game from './components/Game.jsx'
+import Glossary from './components/Glossary.jsx'
+import Playground from './components/Playground.jsx'
+import CommandPalette from './components/CommandPalette.jsx'
+
+function openPalette() {
+  window.dispatchEvent(new CustomEvent('wvc:open-palette'))
+}
 
 function AgentCard({ id }) {
   const a = AGENTS[id]
@@ -49,9 +56,13 @@ export default function App() {
           <a className="link" href="#matrix">controls</a>
           <a className="link" href="#architecture">topology</a>
           <a className="link" href="#game">game</a>
-          <a className="link" href="#verdict">verdict</a>
+          <a className="link" href="#playground">config</a>
+          <a className="link" href="#glossary">glossary</a>
+          <button className="kbtn" onClick={openPalette} aria-label="Open command palette">⌘K</button>
         </div>
       </nav>
+
+      <CommandPalette />
 
       <header className="hero">
         <div className="wrap">
@@ -138,6 +149,8 @@ export default function App() {
 
       <Game />
 
+      <Playground />
+
       <section id="verdict">
         <div className="wrap">
           <div className="section-head">
@@ -169,6 +182,8 @@ export default function App() {
           </div>
         </div>
       </section>
+
+      <Glossary />
 
       <footer>
         <div className="wrap">

@@ -72,6 +72,15 @@ export default function Simulator() {
 
   useEffect(() => clearTimers, [])
 
+  // The command palette can launch a scenario directly.
+  useEffect(() => {
+    function onScenario(e) {
+      if (TRACES[e.detail]) run(e.detail)
+    }
+    window.addEventListener('wvc:scenario', onScenario)
+    return () => window.removeEventListener('wvc:scenario', onScenario)
+  }, [])
+
   return (
     <section id="simulator">
       <div className="wrap">

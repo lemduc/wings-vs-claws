@@ -273,6 +273,92 @@ export const VERDICT = {
     'least-privilege-by-config — just remember multi-tenant hostile isolation is out of scope.',
 }
 
+// IAM glossary — concise, sourced definitions of the jargon used on the site.
+// rel: 'both' | 'hermes' | 'openclaw' (whose mechanism the term leans on).
+export const GLOSSARY = [
+  { term: 'Deny-by-default', rel: 'both', def: 'Access is refused unless a rule explicitly allows it. Hermes’ gateway falls through to deny; OpenClaw requires an allowlist or approved pairing.' },
+  { term: 'DM pairing code', rel: 'both', def: 'A short, expiring code an unknown sender must get approved before they can drive the agent. Hermes: 8 chars, 1h TTL, rate-limited, lockout after 5 fails.' },
+  { term: 'Non-human identity', rel: 'openclaw', def: 'An autonomous agent treated as a security principal that takes actions and touches data. OpenClaw names this explicitly in its model.' },
+  { term: 'Blast radius', rel: 'both', def: 'How much damage a compromised or over-eager agent can do. Both projects shrink it with isolation and least privilege.' },
+  { term: 'Defense in depth', rel: 'hermes', def: 'Stacking independent controls so one failure isn’t fatal — Hermes’ seven-layer model.' },
+  { term: 'SecretRef', rel: 'openclaw', def: 'OpenClaw’s indirection for secrets: values are pulled from env / file / exec providers at runtime, never written into config files.' },
+  { term: 'Secret stripping', rel: 'hermes', def: 'Hermes removes anything matching KEY/TOKEN/SECRET/PASSWORD from a subprocess’ env unless a skill explicitly declares it needs it.' },
+  { term: 'Hardline blocklist', rel: 'hermes', def: 'Commands Hermes refuses to run even under --yolo: rm -rf /, fork bombs, disk formatting, raw block-device writes.' },
+  { term: 'YOLO mode', rel: 'hermes', def: 'Hermes mode that skips approval prompts — but never the hardline blocklist.' },
+  { term: 'Elevated mode', rel: 'openclaw', def: 'OpenClaw’s tools.elevated bypasses sandbox isolation. Off by default; requires an explicit allowlist to enable.' },
+  { term: 'Operator vs non-operator', rel: 'openclaw', def: 'OpenClaw’s role split: the operator holds privileged control of the gateway; everyone else is gated to a smaller surface.' },
+  { term: 'Sandbox scope', rel: 'openclaw', def: 'OpenClaw bounds a sandbox to agent / session / shared, limiting what a single tool run can reach.' },
+  { term: 'Container as boundary', rel: 'hermes', def: 'When Hermes runs in docker / modal, the hardened container is the security boundary, so per-command checks defer to it.' },
+  { term: 'SSRF guard', rel: 'hermes', def: 'Hermes blocks URL tools from reaching private, loopback, link-local, and cloud-metadata addresses to stop server-side request forgery.' },
+  { term: 'Cross-session isolation', rel: 'both', def: 'Sessions can’t read each other’s data or state, so one user or task can’t leak into another.' },
+  { term: 'Subagent visibility', rel: 'openclaw', def: 'OpenClaw scopes which sessions a child agent can see: self / tree / agent / all.' },
+  { term: 'Heartbeat', rel: 'openclaw', def: 'OpenClaw’s scheduled polling loop that lets the agent act proactively rather than only on request.' },
+  { term: 'Least privilege', rel: 'both', def: 'Grant the smallest access that still works, then widen on confidence — OpenClaw’s stated default posture.' },
+]
+
+// Config playground — toggle settings, watch the IAM posture update. Each
+// non-ideal choice carries a risk weight subtracted from a 100-point posture.
+export const PLAYGROUND = [
+  {
+    id: 'auth', label: 'authentication', default: 'allowlist',
+    options: [
+      { v: 'allowlist', label: 'deny-by-default + allowlist', risk: 0 },
+      { v: 'open', label: 'allow-all (open)', risk: 30 },
+    ],
+    note: 'Open auth lets any sender drive the agent. Gate it with pairing / allowlists (Hermes gateway order, OpenClaw pairing).',
+  },
+  {
+    id: 'approval', label: 'command_approval', default: 'manual',
+    options: [
+      { v: 'manual', label: 'manual (prompt)', risk: 0 },
+      { v: 'smart', label: 'smart (LLM-scored)', risk: 5 },
+      { v: 'yolo', label: '--yolo (no prompts)', risk: 25 },
+    ],
+    note: 'YOLO skips human-in-the-loop. Hermes still enforces a hardline blocklist; OpenClaw leans on its tool gates instead.',
+  },
+  {
+    id: 'backend', label: 'execution_backend', default: 'container',
+    options: [
+      { v: 'container', label: 'docker / modal', risk: 0 },
+      { v: 'local', label: 'local (host)', risk: 20 },
+    ],
+    note: 'Local execution has no container boundary. Hermes treats the container as the boundary — prefer it for risky tools.',
+  },
+  {
+    id: 'secrets', label: 'secret_handling', default: 'managed',
+    options: [
+      { v: 'managed', label: 'stripped + SecretRef', risk: 0 },
+      { v: 'forwarded', label: 'forwarded into env', risk: 25 },
+    ],
+    note: 'Forwarding every secret into the subprocess lets code read and exfiltrate it. Strip, then inject only what a skill declares.',
+  },
+  {
+    id: 'network', label: 'network_egress', default: 'off',
+    options: [
+      { v: 'off', label: 'off by default', risk: 0 },
+      { v: 'open', label: 'open egress', risk: 15 },
+    ],
+    note: 'Open egress enables exfiltration and SSRF. OpenClaw disables container network by default; Hermes adds an SSRF guard.',
+  },
+  {
+    id: 'elevated', label: 'sandbox_bypass', default: 'off',
+    options: [
+      { v: 'off', label: 'disabled', risk: 0 },
+      { v: 'on', label: 'elevated on', risk: 25 },
+    ],
+    note: 'Elevated mode removes sandbox isolation. OpenClaw keeps tools.elevated off unless explicitly allowlisted.',
+  },
+  {
+    id: 'visibility', label: 'subagent_visibility', default: 'self',
+    options: [
+      { v: 'self', label: 'self', risk: 0 },
+      { v: 'tree', label: 'tree', risk: 5 },
+      { v: 'all', label: 'all', risk: 15 },
+    ],
+    note: 'Broad visibility lets a subagent read unrelated sessions. Scope to self / tree (OpenClaw visibility control).',
+  },
+]
+
 export const SOURCES = [
   { label: 'Hermes Agent — Security docs', url: 'https://hermes-agent.nousresearch.com/docs/user-guide/security' },
   { label: 'Hermes Agent — SECURITY.md', url: 'https://github.com/NousResearch/hermes-agent/blob/main/SECURITY.md' },
