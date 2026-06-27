@@ -5,6 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Wings vs Claws — Hermes Agent vs OpenClaw on IAM</title>
     <meta name="description" content="An interactive, source-grounded comparison of how two open-source autonomous agents — Nous Research's Hermes Agent and OpenClaw — handle Identity & Access Management: authentication, authorization, secrets, isolation, and delegation." />
+    <script>
+      // Set the theme before first paint to avoid a flash.
+      (function () {
+        try {
+          var t = localStorage.getItem('wvc-theme');
+          if (t !== 'light' && t !== 'dark') {
+            t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          }
+          document.documentElement.setAttribute('data-theme', t);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

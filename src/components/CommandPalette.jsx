@@ -1,20 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { GLOSSARY, SCENARIOS } from '../data.js'
-
-const SECTIONS = [
-  { id: 'simulator', label: 'Access trace simulator', hint: 'section' },
-  { id: 'compare', label: 'Side-by-side diff', hint: 'section' },
-  { id: 'matrix', label: 'IAM control matrix', hint: 'section' },
-  { id: 'architecture', label: 'Enforcement topology (diagrams)', hint: 'section' },
-  { id: 'game', label: 'Defense in Depth (game)', hint: 'section' },
-  { id: 'playground', label: 'Config posture playground', hint: 'section' },
-  { id: 'glossary', label: 'IAM glossary', hint: 'section' },
-  { id: 'verdict', label: 'Verdict — which model?', hint: 'section' },
-]
+import { PAGES } from '../nav.js'
 
 function buildCommands() {
-  const sections = SECTIONS.map((s) => ({
-    kind: 'section', key: `s:${s.id}`, label: s.label, hint: s.hint, target: s.id,
+  const pages = PAGES.map((p) => ({
+    kind: 'page', key: `p:${p.id}`, label: p.label, hint: p.blurb, path: p.path,
   }))
   const terms = GLOSSARY.map((g) => ({
     kind: 'term', key: `t:${g.term}`, label: g.term, hint: 'term', term: g.term,
@@ -22,7 +13,7 @@ function buildCommands() {
   const scenarios = SCENARIOS.map((sc) => ({
     kind: 'scenario', key: `c:${sc.id}`, label: sc.title, hint: 'run trace', scenario: sc.id,
   }))
-  return [...sections, ...terms, ...scenarios]
+  return [...pages, ...terms, ...scenarios]
 }
 
 export default function CommandPalette() {
@@ -30,6 +21,7 @@ export default function CommandPalette() {
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(0)
   const inputRef = useRef(null)
+  const navigate = useNavigate()
   const commands = useMemo(buildCommands, [])
 
   const results = useMemo(() => {
@@ -40,7 +32,6 @@ export default function CommandPalette() {
 
   useEffect(() => { setActive(0) }, [query, open])
 
-  // Global hotkeys: ⌘K / Ctrl+K to open, and a window event for the nav button.
   useEffect(() => {
     function onKey(e) {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
@@ -65,14 +56,14 @@ export default function CommandPalette() {
 
   function run(cmd) {
     setOpen(false)
-    if (cmd.kind === 'section') {
-      document.getElementById(cmd.target)?.scrollIntoView({ behavior: 'smooth' })
+    if (cmd.kind === 'page') {
+      navigate(cmd.path)
     } else if (cmd.kind === 'term') {
-      document.getElementById('glossary')?.scrollIntoView({ behavior: 'smooth' })
-      setTimeout(() => window.dispatchEvent(new CustomEvent('wvc:term', { detail: cmd.term })), 120)
+      navigate('/glossary')
+      setTimeout(() => window.dispatchEvent(new CustomEvent('wvc:term', { detail: cmd.term })), 160)
     } else if (cmd.kind === 'scenario') {
-      document.getElementById('simulator')?.scrollIntoView({ behavior: 'smooth' })
-      setTimeout(() => window.dispatchEvent(new CustomEvent('wvc:scenario', { detail: cmd.scenario })), 120)
+      navigate('/trace')
+      setTimeout(() => window.dispatchEvent(new CustomEvent('wvc:scenario', { detail: cmd.scenario })), 160)
     }
   }
 
@@ -94,7 +85,7 @@ export default function CommandPalette() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onListKey}
-            placeholder="jump to a section, term, or scenario…"
+            placeholder="jump to a page, term, or scenario…"
             aria-label="Command palette"
           />
           <span className="pi-esc">esc</span>
@@ -107,7 +98,7 @@ export default function CommandPalette() {
               onMouseEnter={() => setActive(i)}
               onClick={() => run(c)}
             >
-              <span className={`pi-kind k-${c.kind}`}>{c.kind === 'section' ? '#' : c.kind === 'term' ? '¶' : '▸'}</span>
+              <span className={`pi-kind k-${c.kind}`}>{c.kind === 'page' ? '#' : c.kind === 'term' ? '¶' : '▸'}</span>
               <span className="pi-label">{c.label}</span>
               <span className="pi-hint">{c.hint}</span>
             </button>
