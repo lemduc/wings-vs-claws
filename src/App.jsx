@@ -9,6 +9,7 @@ import Playground from './components/Playground.jsx'
 import Game from './components/Game.jsx'
 import Glossary from './components/Glossary.jsx'
 import Sources from './components/Sources.jsx'
+import Journey from './components/Journey.jsx'
 
 function Overview() {
   return (<><Hero /><Verdict /></>)
@@ -23,6 +24,7 @@ export default function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Overview />} />
+          <Route path="/journey" element={<Journey />} />
           <Route path="/trace" element={<Simulator />} />
           <Route path="/compare" element={<Compare />} />
           <Route path="/topology" element={<Architecture />} />

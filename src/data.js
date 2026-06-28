@@ -359,6 +359,76 @@ export const PLAYGROUND = [
   },
 ]
 
+// The journey of IAM, era by era. Each era solved the previous era's problem
+// and created a new kind of identity to govern — ending at AI agents.
+// Dates are well-established milestones; Era 5–6 figures are cited in JOURNEY_SOURCES.
+export const ERAS = [
+  {
+    id: 'era0', n: 0, hash: 'acl0de', range: '1960s–1990s', title: 'Walls & lists',
+    identity: 'A username on one machine.',
+    tech: ['Mainframe accounts', 'Access control lists (ACLs)', 'Passwords'],
+    broke: 'No shared identity across systems — every box was its own island.',
+  },
+  {
+    id: 'era1', n: 1, hash: '1dap93', range: '1990s', title: 'Directories',
+    identity: 'A row in a central store of record.',
+    tech: ['LDAP (1993)', 'Kerberos v5 (1993)', 'Active Directory (2000)'],
+    broke: 'Identity stopped at the org boundary — partners and SaaS couldn’t use it.',
+  },
+  {
+    id: 'era2', n: 2, hash: '5am105', range: '2000s', title: 'Federation & SSO',
+    identity: 'A signed claim you carry between orgs.',
+    tech: ['SAML 2.0 (2005)', 'Web SSO', 'OAuth 1.0 (2007)'],
+    broke: 'Apps and APIs needed delegated, machine-to-machine access — not just human logins.',
+  },
+  {
+    id: 'era3', n: 3, hash: '0a2718', range: '2010s', title: 'Delegated / API era',
+    identity: 'A scoped, expiring token.',
+    tech: ['OAuth 2.0 (2012)', 'OpenID Connect (2014)', 'Cloud IAM — AWS IAM (2011)', 'MFA · IGA · PAM'],
+    broke: 'The perimeter dissolved; trust could no longer be based on network location.',
+  },
+  {
+    id: 'era4', n: 4, hash: '21row7', range: 'late 2010s–2021', title: 'Zero Trust & workloads',
+    identity: 'A continuously verified workload.',
+    tech: ['Zero Trust (Forrester 2010 → NIST SP 800-207, 2020)', 'Google BeyondCorp', 'SPIFFE / SPIRE'],
+    broke: 'Machine identities began to outnumber humans — and nobody was governing them.',
+  },
+  {
+    id: 'era5', n: 5, hash: '9h1e44', range: '2023–2025', title: 'Non-human identities explode',
+    identity: 'A service principal living on secrets.',
+    tech: ['NHI security as a category', 'Secret scanning & rotation', '144:1 NHI-to-human ratio (+44% YoY)'],
+    broke: '97% of NHIs are over-permissioned and secrets sprawl. One stolen token reached hundreds of systems (Salesloft–Drift, 2025).',
+  },
+  {
+    id: 'era6', n: 6, hash: 'a6e27f', range: '2025–now', title: 'Agents — you are here',
+    identity: 'An autonomous actor acting on your behalf.',
+    tech: ['MCP OAuth 2.1 authorization (spec 2025-11)', 'OAuth on-behalf-of-user draft (May 2025)', 'RFC 8707 resource indicators', 'RFC 8693 token exchange', 'NIST AI Agent Standards Initiative (Feb 2026)'],
+    broke: 'Agents are non-deterministic, multi-hop delegate to sub-agents, and run continuously — static creds and one-time grants can’t hold. This is the open problem.',
+    here: true,
+  },
+]
+
+// Rosetta Stone: each agent control re-derives a classic IAM idea.
+export const ROSETTA = [
+  { agent: 'DM pairing code', classic: 'User enrollment / onboarding', era: 'Era 1', note: 'A new principal proves itself once, then joins the set of allowed identities.' },
+  { agent: 'Allowlist (gateway order)', classic: 'Access control list (ACL)', era: 'Era 0', note: 'The oldest control there is — an explicit list of who may act.' },
+  { agent: 'Operator vs non-operator', classic: 'Role-based access control (RBAC)', era: 'Era 2–3', note: 'Authority bundled into a role instead of granted per action.' },
+  { agent: 'SecretRef / secret stripping', classic: 'Secrets management & vaulting', era: 'Era 3–5', note: 'Inject credentials at runtime, never store them in code — the lesson NHIs keep relearning.' },
+  { agent: 'Container as the boundary', classic: 'Workload identity & isolation', era: 'Era 4', note: 'The sandbox, not the network, is the trust boundary — pure Zero Trust.' },
+  { agent: 'Dangerous-command approval', classic: 'Step-up auth / privileged access (PAM)', era: 'Era 3', note: 'High-risk actions demand a fresh, explicit human approval.' },
+  { agent: 'Sub-agent visibility / delegation', classic: 'Token exchange & on-behalf-of', era: 'Era 6', note: 'A child gets only the narrowed authority the parent explicitly passes down (RFC 8693 / OBO draft).' },
+  { agent: 'SSRF guard / egress off', classic: 'Network segmentation & egress control', era: 'Era 1–4', note: 'Classic blast-radius containment, applied to an autonomous process.' },
+]
+
+export const JOURNEY_SOURCES = [
+  { label: 'Insight Partners — IAM in the age of AI agents', url: 'https://www.insightpartners.com/ideas/iam-ai-agents/' },
+  { label: 'Aembit — IAM for Agentic AI', url: 'https://aembit.io/blog/iam-agentic-ai/' },
+  { label: 'IETF — OAuth On-Behalf-Of User Authorization for AI Agents (draft)', url: 'https://www.ietf.org/archive/id/draft-oauth-ai-agents-on-behalf-of-user-01.html' },
+  { label: 'Model Context Protocol — Authorization spec', url: 'https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization' },
+  { label: 'Research: 44% NHI growth, 144:1 ratio (2024→2025)', url: 'https://www.cybersecuritytribe.com/news/research-reveals-44-growth-in-nhis-from-2024-to-2025' },
+  { label: 'NIST — Zero Trust Architecture (SP 800-207)', url: 'https://csrc.nist.gov/pubs/sp/800/207/final' },
+]
+
 export const SOURCES = [
   { label: 'Hermes Agent — Security docs', url: 'https://hermes-agent.nousresearch.com/docs/user-guide/security' },
   { label: 'Hermes Agent — SECURITY.md', url: 'https://github.com/NousResearch/hermes-agent/blob/main/SECURITY.md' },

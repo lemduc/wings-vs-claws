@@ -2,6 +2,7 @@
 // and the ⌘K command palette.
 export const PAGES = [
   { path: '/', id: 'overview', label: 'Overview', icon: '⌂', blurb: 'the two agents + the verdict' },
+  { path: '/journey', id: 'journey', label: 'The journey', icon: '↟', blurb: 'IAM, pre-AI to agents' },
   { path: '/trace', id: 'trace', label: 'Access trace', icon: '❯', blurb: 'simulate an access decision' },
   { path: '/compare', id: 'compare', label: 'Compare', icon: '≡', blurb: 'diff + control matrix' },
   { path: '/topology', id: 'topology', label: 'Topology', icon: '◈', blurb: 'enforcement diagrams' },

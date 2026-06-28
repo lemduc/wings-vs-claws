@@ -434,6 +434,47 @@ section { padding: 52px 0; border-top: 1px solid var(--border-soft); }
 .pg-risk-tag { display: block; color: var(--claw); font-size: 12.5px; font-weight: 700; }
 .pg-risk-note { color: var(--muted); font-size: 12px; }
 
+/* ---------- Journey: git-log timeline ---------- */
+.commitlog { padding: 8px 18px; }
+.commit { display: grid; grid-template-columns: 24px 1fr; gap: 12px; }
+.commit .graph { position: relative; }
+.commit .graph .line { position: absolute; left: 11px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+.commit:first-child .graph .line { top: 18px; }
+.commit:last-child .graph .line { bottom: calc(100% - 24px); }
+.commit .graph .node { position: absolute; left: 5px; top: 14px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--hermes); z-index: 1; }
+.commit.here .graph .node { border-color: var(--claw); box-shadow: 0 0 0 4px rgba(240, 136, 62, 0.2); }
+.commit-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; width: 100%; text-align: left; background: transparent; border: none; color: var(--text); font-family: var(--mono); cursor: pointer; padding: 9px 0; font-size: 13px; }
+.commit-head .chash { color: var(--yellow); }
+.commit-head .cref { color: var(--green); font-size: 12px; }
+.commit-head .chead { color: var(--claw); font-weight: 700; font-size: 12px; }
+.commit-head .ctitle { font-weight: 700; }
+.commit.here .commit-head .ctitle { color: var(--claw); }
+.commit-head .cdate { margin-left: auto; color: var(--faint); font-size: 12px; }
+.commit-detail { padding: 2px 0 16px; }
+.cd-row { display: flex; gap: 10px; margin-bottom: 8px; font-size: 12.5px; }
+.cd-k { color: var(--faint); width: 56px; flex: none; }
+.cd-k::after { content: ':'; }
+.cd-v { color: var(--muted); }
+.cd-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.cd-chips .chip { font-size: 11px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 5px; padding: 2px 8px; color: var(--muted); }
+.cd-broke { font-size: 12.5px; color: var(--claw); border-left: 2px solid var(--claw); padding-left: 10px; margin-top: 8px; }
+.commit:not(.here) .cd-broke { color: var(--muted); border-left-color: var(--faint); }
+
+.journey-cta { display: flex; align-items: center; gap: 12px; margin-top: 22px; padding: 14px 16px; border: 1px solid var(--border); border-left: 3px solid var(--claw); border-radius: 8px; background: var(--panel); color: var(--text); text-decoration: none; font-size: 13px; }
+.journey-cta:hover { border-color: var(--claw); text-decoration: none; }
+.journey-cta .jc-k { color: var(--green); }
+.journey-cta .jc-arrow { margin-left: auto; color: var(--claw); }
+
+/* ---------- Rosetta mapping ---------- */
+.rosetta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ros { border: 1px solid var(--border); border-radius: 8px; background: var(--panel); padding: 13px 14px; }
+.ros-top { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.ros-agent { color: var(--hermes); font-weight: 700; font-size: 13px; }
+.ros-arrow { color: var(--faint); }
+.ros-classic { color: var(--text); font-weight: 700; font-size: 13px; }
+.ros-era { margin-left: auto; font-size: 10px; color: var(--purple); border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; }
+.ros-note { color: var(--muted); font-size: 12px; }
+
 /* ---------- Sources block ---------- */
 .sources { padding: 30px 0 40px; margin-top: 22px; border-top: 1px solid var(--border); color: var(--faint); font-size: 12.5px; }
 .sources h5 { color: var(--muted); font-size: 13px; margin: 0 0 10px; }
@@ -456,7 +497,7 @@ section { padding: 52px 0; border-top: 1px solid var(--border-soft); }
 }
 
 @media (max-width: 800px) {
-  .split, .lanes, .arch-grid, .verdict-grid, .dim-cols, .gloss-grid, .pg-grid { grid-template-columns: 1fr; }
+  .split, .lanes, .arch-grid, .verdict-grid, .dim-cols, .gloss-grid, .pg-grid, .rosetta-grid { grid-template-columns: 1fr; }
   .dim-col.h { border-right: none; border-bottom: 1px solid var(--border); }
   .matrix thead { display: none; }
   .matrix td { display: block; border: none; padding: 3px 0; }
