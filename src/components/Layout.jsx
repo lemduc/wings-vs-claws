@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { PAGES } from '../nav.js'
+import { NAV } from '../nav.js'
 import ThemeToggle from './ThemeToggle.jsx'
 import CommandPalette from './CommandPalette.jsx'
 
@@ -37,19 +37,24 @@ export default function Layout() {
       <div className="shell">
         <aside className={`sidebar ${navOpen ? 'open' : ''}`}>
           <nav className="sidenav">
-            {PAGES.map((p) => (
-              <NavLink
-                key={p.path}
-                to={p.path}
-                end={p.path === '/'}
-                className={({ isActive }) => `sidelink ${isActive ? 'active' : ''}`}
-              >
-                <span className="si">{p.icon}</span>
-                <span className="sl">
-                  <span className="slabel">{p.label}</span>
-                  <span className="sblurb">{p.blurb}</span>
-                </span>
-              </NavLink>
+            {NAV.map((section) => (
+              <div className="sidesection" key={section.title}>
+                <div className="sidesection-title">{section.title}</div>
+                {section.items.map((p) => (
+                  <NavLink
+                    key={p.path}
+                    to={p.path}
+                    end={p.path === '/'}
+                    className={({ isActive }) => `sidelink ${isActive ? 'active' : ''}`}
+                  >
+                    <span className="si">{p.icon}</span>
+                    <span className="sl">
+                      <span className="slabel">{p.label}</span>
+                      <span className="sblurb">{p.blurb}</span>
+                    </span>
+                  </NavLink>
+                ))}
+              </div>
             ))}
           </nav>
           <div className="sidefoot">

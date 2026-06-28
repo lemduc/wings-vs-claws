@@ -429,6 +429,192 @@ export const JOURNEY_SOURCES = [
   { label: 'NIST — Zero Trust Architecture (SP 800-207)', url: 'https://csrc.nist.gov/pubs/sp/800/207/final' },
 ]
 
+// ── Foundations: short, visual lessons on core IAM primitives ──────────────
+// Each lesson: concept → diagram (flow) → "how it changes for agents" → quiz.
+export const LESSONS = [
+  {
+    slug: 'authn-vs-authz', icon: '🪪', level: 'Foundation',
+    title: 'Authentication vs Authorization',
+    tldr: 'Authentication proves who you are. Authorization decides what you may do. Agents add a third question: who are you acting for?',
+    sections: [
+      { h: 'Two different questions', p: 'Authentication (authN) verifies an identity — a password, API key, certificate, or token. Authorization (authZ) is a separate decision made afterward: is this verified identity allowed to do this specific thing? You authenticate once, then authorize every action.' },
+      { h: 'Where each shows up', p: 'AuthN: login, mTLS, an OIDC token, a pairing code. AuthZ: roles, ACLs, OAuth scopes, a policy engine. Confusing the two is a classic source of bugs — a valid token (authN passed) does not mean the action is permitted (authZ).' },
+    ],
+    flow: [{ label: 'AuthN', sub: 'who are you?' }, { label: 'AuthZ', sub: 'what may you do?' }, { label: 'Decision', sub: 'allow / deny' }],
+    agentTwist: 'An agent authenticates as a non-human identity, but it usually acts on behalf of a human. So authorization must weigh both the agent and the delegating user — the "on-behalf-of" problem.',
+    related: [{ to: '/learn/access-models', label: 'Access models' }, { to: '/learn/agent-delegation', label: 'Agent delegation' }],
+    quiz: [
+      { q: 'A system checks your password. Which step is this?', options: ['Authentication', 'Authorization', 'Neither'], answer: 0, explain: 'Verifying an identity = authentication.' },
+      { q: '"This token may read but not write." Which step is this?', options: ['Authentication', 'Authorization'], answer: 1, explain: 'Deciding what an identity may do = authorization.' },
+      { q: 'For an AI agent, authorization should consider…', options: ['Only the agent', 'Only the user', 'Both the agent and the user it acts for'], answer: 2, explain: 'Agents act on-behalf-of a user; both identities matter.' },
+    ],
+  },
+  {
+    slug: 'access-models', icon: '🗂️', level: 'Foundation',
+    title: 'Access models: ACL, RBAC, ABAC',
+    tldr: 'Three ways to express "who can do what" — lists, roles, and policies — trading simplicity for flexibility.',
+    sections: [
+      { h: 'ACL — lists', p: 'An access control list attaches permissions directly to a resource: principal X may read, Y may write. Simple and old, but it explodes as identities and resources grow.' },
+      { h: 'RBAC — roles', p: 'Role-based access control bundles permissions into roles ("auditor", "operator") and assigns roles to identities. It scales with org structure but suffers "role explosion" when every exception needs a new role.' },
+      { h: 'ABAC / PBAC — policies', p: 'Attribute/policy-based access evaluates rules at runtime using attributes (department, resource tag, time, risk). Most flexible, but needs a policy engine and good data.' },
+    ],
+    flow: [{ label: 'ACL', sub: 'who → resource' }, { label: 'RBAC', sub: 'role bundles' }, { label: 'ABAC', sub: 'policy at runtime' }],
+    agentTwist: 'Agents are dynamic and non-deterministic, so standing roles strain. Agentic IAM leans toward attribute/policy decisions made just-in-time — authorize the action now, not a role forever.',
+    related: [{ to: '/learn/zero-trust', label: 'Zero Trust' }, { to: '/compare', label: 'See it in the comparison' }],
+    quiz: [
+      { q: 'Which model bundles permissions into named job functions?', options: ['ACL', 'RBAC', 'ABAC'], answer: 1, explain: 'RBAC = role-based.' },
+      { q: 'Which is most suited to runtime, context-aware decisions?', options: ['ACL', 'ABAC / PBAC'], answer: 1, explain: 'Attribute/policy-based access decides at runtime from context.' },
+      { q: '"Role explosion" is a downside of…', options: ['ACL', 'RBAC', 'ABAC'], answer: 1, explain: 'RBAC can sprawl into too many narrow roles.' },
+    ],
+  },
+  {
+    slug: 'tokens-oauth', icon: '🎟️', level: 'Foundation',
+    title: 'Tokens, OAuth 2.0 & OIDC',
+    tldr: 'OAuth lets an app act on your behalf without your password, using scoped, expiring tokens. OIDC adds "who you are" on top.',
+    sections: [
+      { h: 'Delegated access', p: 'OAuth 2.0 is an authorization framework: instead of handing an app your password, you grant it limited access. It receives a scoped access token — never your credentials.' },
+      { h: 'Tokens & scopes', p: 'Access tokens are short-lived and scoped (the permission boundary). Refresh tokens renew them. A bearer token is "whoever holds it" — which is exactly why long-lived ones are dangerous.' },
+      { h: 'OIDC adds identity', p: 'OpenID Connect layers an ID token on OAuth 2.0 to answer "who is the user?". Rule of thumb: OAuth = authorization, OIDC = authentication.' },
+    ],
+    flow: [{ label: 'User consents' }, { label: 'Authz server', sub: 'issues token' }, { label: 'App / agent', sub: 'scoped token' }, { label: 'Resource', sub: 'checks scope' }],
+    agentTwist: 'Agents are the ultimate "app acting on your behalf" — but classic OAuth never imagined an agent that delegates to sub-agents. New work (the OAuth on-behalf-of-user draft, MCP’s OAuth 2.1 profile, RFC 8693 token exchange) makes tokens carry a delegation chain so you can trace user → agent → sub-agent.',
+    related: [{ to: '/learn/agent-delegation', label: 'Agent delegation' }, { to: '/journey', label: 'Where this fits in the journey' }],
+    quiz: [
+      { q: 'OAuth 2.0 is primarily a framework for…', options: ['Authentication', 'Authorization / delegated access', 'Encryption'], answer: 1, explain: 'OAuth delegates scoped access; OIDC adds authentication.' },
+      { q: 'What bounds what an access token can do?', options: ['Its scope', 'Its colour', 'Its length'], answer: 0, explain: 'Scope is the permission boundary.' },
+      { q: 'Why are long-lived bearer tokens risky?', options: ['They expire too fast', 'Anyone who holds one can use it', 'They need a password'], answer: 1, explain: 'Bearer = whoever holds it; long life = big blast radius.' },
+    ],
+  },
+  {
+    slug: 'zero-trust', icon: '🛡️', level: 'Foundation',
+    title: 'Zero Trust & least privilege',
+    tldr: 'Never trust, always verify. Drop the network perimeter; make every request prove identity and context, and grant the least privilege that works.',
+    sections: [
+      { h: 'The shift', p: 'Old model: inside the network = trusted. Zero Trust removes implicit trust — location proves nothing. Google’s BeyondCorp proved it in practice; NIST SP 800-207 (2020) codified it.' },
+      { h: 'Three principles', p: 'Verify explicitly (every request, with context), enforce least privilege (smallest access that works), and assume breach (limit blast radius, segment, log).' },
+      { h: 'Identity becomes the perimeter', p: 'Workloads and agents have no "inside" to be in. Identity — not the network — becomes the control plane (SPIFFE/SPIRE gave workloads verifiable identity).' },
+    ],
+    flow: [{ label: 'Request' }, { label: 'Verify', sub: 'identity + context' }, { label: 'Least privilege', sub: 'minimal grant' }, { label: 'Assume breach', sub: 'contain + log' }],
+    agentTwist: 'An autonomous agent is the purest Zero Trust subject: no fixed location, always running, and compromisable. Treating the sandbox/container as the boundary and checking every action — as Hermes does — is Zero Trust applied to an agent.',
+    related: [{ to: '/learn/nhi', label: 'Non-human identities' }, { to: '/topology', label: 'Enforcement topology' }],
+    quiz: [
+      { q: 'The Zero Trust motto is…', options: ['Trust but verify', 'Never trust, always verify', 'Trust the network'], answer: 1, explain: 'No implicit trust — verify every request.' },
+      { q: 'Which NIST publication codified Zero Trust?', options: ['SP 800-53', 'SP 800-207', 'SP 800-63'], answer: 1, explain: 'SP 800-207 (2020) is the Zero Trust Architecture standard.' },
+      { q: 'In Zero Trust, the new perimeter is…', options: ['The firewall', 'Identity', 'The VPN'], answer: 1, explain: 'Identity becomes the control plane.' },
+    ],
+  },
+  {
+    slug: 'nhi', icon: '🤖', level: 'Foundation',
+    title: 'Non-human identities (NHIs)',
+    tldr: 'Most identities are not people — they are service accounts, API keys, workloads, and now agents. They outnumber humans 100:1+ and are a top breach vector.',
+    sections: [
+      { h: 'What counts as an NHI', p: 'Service accounts, API keys, OAuth apps, certificates, workloads, bots — and AI agents. Anything that authenticates and acts without a human at the keyboard.' },
+      { h: 'Why they’re risky', p: 'NHIs are routinely over-permissioned (~97%), live on long-lived secrets that rarely rotate, are often unowned and unmonitored, and they spawn more NHIs. Research puts the NHI-to-human ratio around 144:1 (2025), up 44% year over year.' },
+      { h: 'A real failure', p: 'The 2025 Salesloft–Drift breach started with stolen OAuth tokens from one integration and reached hundreds of downstream environments — a single NHI with too much standing access.' },
+    ],
+    flow: [{ label: 'Service acct' }, { label: 'API key' }, { label: 'Workload' }, { label: 'Agent', sub: 'newest, riskiest' }],
+    agentTwist: 'Agents are a new, especially dangerous NHI class: unlike a static service account, they reason, act unpredictably, and spawn sub-identities. Yet only ~22% of teams treat agents as first-class, identity-bearing entities.',
+    related: [{ to: '/learn/agent-delegation', label: 'Agent delegation' }, { to: '/cases', label: 'Case files' }],
+    quiz: [
+      { q: 'Which is a non-human identity?', options: ['A service account', 'A CEO', 'A meeting room'], answer: 0, explain: 'Service accounts, keys, workloads, agents = NHIs.' },
+      { q: 'Roughly what share of NHIs are over-permissioned?', options: ['About 10%', 'About 50%', 'About 97%'], answer: 2, explain: 'Research found ~97% have excessive privileges.' },
+      { q: 'The biggest everyday NHI risk is…', options: ['Long-lived, sprawling secrets', 'Too many passwords', 'Slow logins'], answer: 0, explain: 'Long-lived, unrotated, over-scoped secrets dominate NHI risk.' },
+    ],
+  },
+  {
+    slug: 'agent-delegation', icon: '🔗', level: 'Agentic',
+    title: 'Delegation & on-behalf-of for agents',
+    tldr: 'Agents act for you and hand work to sub-agents. The hard part: carry authority down the chain without over-granting — and keep it auditable.',
+    sections: [
+      { h: 'On-behalf-of', p: 'An agent rarely acts as itself; it acts for a user. Authorization has to capture both the user’s consent and the agent’s identity. The IETF "OAuth on-behalf-of user for AI agents" draft adds an act claim, a requested_actor consent parameter, and an actor_token to do exactly this.' },
+      { h: 'Multi-hop delegation', p: 'When an orchestrator hands a task to a sub-agent, each hop should narrow scope (RFC 8693 token exchange) rather than pass the full token. Otherwise authority — and accountability — leak downstream.' },
+      { h: 'Keeping the chain traceable', p: 'If nobody records which agent authorized which sub-agent with what scope, the accountability chain fractures. The delegation chain in the token is what lets you answer "who told this sub-agent it could do that?"' },
+    ],
+    flow: [{ label: 'User', sub: 'consents' }, { label: 'Agent', sub: 'act = agent' }, { label: 'Sub-agent', sub: 'narrowed scope' }, { label: 'Resource' }],
+    agentTwist: 'This is the agentic frontier. Hermes scopes sub-agents via cross-session isolation; OpenClaw uses explicit delegation plus visibility: self / tree / agent / all. Both are early answers to a problem standards are still racing to solve.',
+    related: [{ to: '/compare', label: 'How Hermes & OpenClaw handle it' }, { to: '/journey', label: 'Era 6 of the journey' }],
+    quiz: [
+      { q: 'An agent acting "on-behalf-of" a user means authorization must capture…', options: ['Just the agent', 'The user’s consent and the agent’s identity', 'Only the resource'], answer: 1, explain: 'Both the delegating user and the agent matter.' },
+      { q: 'When an orchestrator delegates to a sub-agent, scope should…', options: ['Stay the same', 'Get narrower', 'Get broader'], answer: 1, explain: 'Each hop should narrow authority (RFC 8693).' },
+      { q: 'What breaks if delegation is not recorded?', options: ['Token speed', 'The accountability chain', 'Encryption'], answer: 1, explain: 'Untracked delegation fractures accountability.' },
+    ],
+  },
+]
+
+// ── Case files: learn from real (and representative) failures ───────────────
+export const CASES = [
+  {
+    id: 'salesloft-drift', icon: '🔓', title: 'The Salesloft–Drift OAuth-token breach', year: '2025',
+    severity: 'real incident',
+    what: 'Attackers obtained OAuth tokens from a widely-integrated third-party app and used them to pull data from hundreds of downstream environments — the biggest SaaS breach of the year, with ~10× the blast radius of prior incidents.',
+    identity: 'A single non-human identity (an OAuth app token) carrying broad, long-lived, standing scope across many tenants.',
+    stopper: 'Short-lived, narrowly-scoped tokens; NHI inventory + monitoring; least privilege per integration; fast token revocation. Any one would have shrunk the blast radius.',
+    era: 'Era 5 — NHIs', maps: 'SecretRef / token hygiene',
+    source: 'https://permiso.io/non-human-identity-nhi-security-guide',
+  },
+  {
+    id: 'runaway-agent', icon: '🌀', title: 'The agent nobody could stop', year: '2026',
+    severity: 'representative pattern',
+    what: 'An agent with standing broad credentials begins taking unintended actions. Teams discover they cannot enforce a purpose limit or terminate it cleanly — 63% of orgs report they cannot enforce purpose limits, and 60% cannot kill a misbehaving agent.',
+    identity: 'An over-trusted agent identity with no runtime authorization and no kill switch.',
+    stopper: 'Just-in-time / runtime authorization, purpose limitation, human-in-the-loop approval for dangerous actions, and an enforced kill switch.',
+    era: 'Era 6 — Agents', maps: 'Dangerous-command approval',
+    source: 'https://www.gravitee.io/blog/state-of-ai-agent-security-2026-report-when-adoption-outpaces-control',
+  },
+  {
+    id: 'shadow-agents', icon: '👻', title: 'Shadow agents in production', year: '2026',
+    severity: 'representative pattern',
+    what: 'Business units deploy agents outside security’s visibility. Mean monitoring coverage sits near 52%, so roughly half of production agents run unsecured — unregistered identities, untracked credentials, unmonitored access.',
+    identity: 'Uninventoried agent identities operating with credentials no one owns.',
+    stopper: 'Agent discovery and inventory; treat every agent as a first-class identity (only ~22% do); centralized issuance instead of ad-hoc service accounts.',
+    era: 'Era 6 — Agents', maps: 'Allowlist / gateway authority',
+    source: 'https://www.gravitee.io/blog/state-of-ai-agent-security-2026-report-when-adoption-outpaces-control',
+  },
+  {
+    id: 'prompt-injection-exfil', icon: '🧬', title: 'Prompt-injection → data exfiltration', year: '2026',
+    severity: 'representative pattern',
+    what: 'An agent reads an attacker-poisoned document (a project file, an email) containing hidden instructions, then uses its tools and network access to exfiltrate secrets — turning the agent into a confused deputy.',
+    identity: 'A legitimately-authenticated agent tricked into abusing its own authorized access.',
+    stopper: 'Context-file scanning, egress off by default, secret stripping from the subprocess, and credential redaction — exactly the layers in the defense-in-depth model.',
+    era: 'Era 6 — Agents', maps: 'Context scanning + egress control',
+    source: 'https://www.obsidiansecurity.com/blog/ai-agent-protection',
+  },
+]
+
+// ── Learning paths: ordered routes by level ─────────────────────────────────
+export const LEARNING_PATHS = [
+  {
+    id: 'new-iam', icon: '🌱', title: 'New to IAM', who: 'Start from zero — what identity even means.',
+    steps: [
+      { to: '/learn/authn-vs-authz', label: 'AuthN vs AuthZ' },
+      { to: '/learn/access-models', label: 'Access models' },
+      { to: '/learn/tokens-oauth', label: 'Tokens, OAuth & OIDC' },
+      { to: '/learn/zero-trust', label: 'Zero Trust' },
+      { to: '/journey', label: 'The journey of IAM' },
+    ],
+  },
+  {
+    id: 'new-agents', icon: '🤖', title: 'Know IAM, new to agents', who: 'You get identity — see what agents break.',
+    steps: [
+      { to: '/learn/nhi', label: 'Non-human identities' },
+      { to: '/learn/agent-delegation', label: 'Agent delegation' },
+      { to: '/journey', label: 'Eras 5–6 of the journey' },
+      { to: '/', label: 'Case study: Hermes vs OpenClaw' },
+      { to: '/cases', label: 'Case files' },
+    ],
+  },
+  {
+    id: 'practitioner', icon: '🛠️', title: 'Practitioner', who: 'Go deep on controls and trade-offs.',
+    steps: [
+      { to: '/compare', label: 'IAM diff & control matrix' },
+      { to: '/topology', label: 'Enforcement topology' },
+      { to: '/playground', label: 'Config posture' },
+      { to: '/cases', label: 'Case files' },
+      { to: '/quiz', label: 'Test yourself' },
+    ],
+  },
+]
+
 export const SOURCES = [
   { label: 'Hermes Agent — Security docs', url: 'https://hermes-agent.nousresearch.com/docs/user-guide/security' },
   { label: 'Hermes Agent — SECURITY.md', url: 'https://github.com/NousResearch/hermes-agent/blob/main/SECURITY.md' },

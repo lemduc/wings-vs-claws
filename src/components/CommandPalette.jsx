@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { GLOSSARY, SCENARIOS } from '../data.js'
+import { GLOSSARY, SCENARIOS, LESSONS } from '../data.js'
 import { PAGES } from '../nav.js'
 
 function buildCommands() {
   const pages = PAGES.map((p) => ({
     kind: 'page', key: `p:${p.id}`, label: p.label, hint: p.blurb, path: p.path,
+  }))
+  const lessons = LESSONS.map((l) => ({
+    kind: 'page', key: `l:${l.slug}`, label: l.title, hint: 'lesson', path: `/learn/${l.slug}`,
   }))
   const terms = GLOSSARY.map((g) => ({
     kind: 'term', key: `t:${g.term}`, label: g.term, hint: 'term', term: g.term,
@@ -13,7 +16,7 @@ function buildCommands() {
   const scenarios = SCENARIOS.map((sc) => ({
     kind: 'scenario', key: `c:${sc.id}`, label: sc.title, hint: 'run trace', scenario: sc.id,
   }))
-  return [...pages, ...terms, ...scenarios]
+  return [...pages, ...lessons, ...terms, ...scenarios]
 }
 
 export default function CommandPalette() {
