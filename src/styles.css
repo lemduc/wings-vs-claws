@@ -504,6 +504,51 @@ section { padding: 52px 0; border-top: 1px solid var(--border-soft); }
 .std-status { font-size: 11px; color: var(--faint); margin-bottom: 7px; }
 .std-what { font-size: 12.5px; color: var(--muted); }
 
+/* ---------- Delegation lab ---------- */
+.dlg-toggle { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+.dlg-mode { font-family: var(--mono); background: var(--panel); border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; }
+.dlg-mode .k { color: var(--faint); font-size: 11px; margin-left: 6px; }
+.dlg-mode.on { border-color: var(--green); color: var(--text); box-shadow: 0 0 0 1px var(--green) inset; }
+.dlg-mode.on.bad { border-color: var(--red); box-shadow: 0 0 0 1px var(--red) inset; }
+.dlg-chain { display: flex; flex-direction: column; gap: 0; }
+.dlg-node { background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--hermes); border-radius: 9px; padding: 13px 15px; position: relative; margin-bottom: 26px; }
+.dlg-node:not(:last-child)::after { content: '↓ delegates'; position: absolute; left: 18px; bottom: -21px; font-size: 11px; color: var(--faint); }
+.dlg-node.over { border-left-color: var(--red); }
+.dlg-top { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+.dlg-who { font-weight: 700; font-size: 14px; }
+.dlg-role { font-size: 11px; color: var(--faint); }
+.dlg-scopes { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.scope { font-size: 11px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 5px; padding: 2px 8px; color: var(--hermes); }
+.scope.unused { color: var(--red); border-color: var(--red); text-decoration: line-through; }
+.dlg-warn { font-size: 12px; color: var(--red); margin-bottom: 4px; }
+.dlg-act { font-size: 11px; color: var(--faint); }
+.dlg-verdict { border-radius: 9px; padding: 14px 16px; font-size: 13px; margin-top: 6px; }
+.dlg-verdict.good { color: var(--green); border: 1px solid var(--green); background: rgba(63,185,80,0.08); }
+.dlg-verdict.bad { color: var(--red); border: 1px solid var(--red); background: rgba(248,81,73,0.08); }
+.dlg-note { margin-top: 14px; font-size: 12.5px; color: var(--muted); }
+
+/* ---------- OAuth flow lab ---------- */
+.oauth-actors { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
+.oauth-actor { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px 10px; text-align: center; transition: border-color .15s, background .15s; }
+.oauth-actor .oa-name { font-size: 12.5px; font-weight: 700; color: var(--muted); }
+.oauth-actor.active-from { border-color: var(--hermes); background: var(--panel-2); }
+.oauth-actor.active-from .oa-name { color: var(--hermes); }
+.oauth-actor.active-to { border-color: var(--claw); background: var(--panel-2); }
+.oauth-actor.active-to .oa-name { color: var(--claw); }
+.oauth-msg { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+.om-route { display: flex; align-items: center; gap: 10px; font-size: 12px; margin-bottom: 10px; }
+.om-from { color: var(--hermes); font-weight: 700; }
+.om-arrow { color: var(--faint); }
+.om-to { color: var(--claw); font-weight: 700; }
+.om-line { font-size: 13.5px; color: var(--text); margin-bottom: 8px; }
+.om-line .prompt::before { content: '› '; color: var(--green); }
+.om-detail { font-size: 13px; color: var(--muted); }
+.oauth-track { display: flex; gap: 7px; justify-content: center; margin-bottom: 14px; }
+.ot-dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-soft); cursor: pointer; padding: 0; }
+.ot-dot.done { background: var(--hermes); border-color: var(--hermes); opacity: 0.5; }
+.ot-dot.on { background: var(--hermes); border-color: var(--hermes); }
+.oauth-actions { display: flex; gap: 10px; justify-content: center; }
+
 /* ---------- Sidebar sections ---------- */
 .sidesection { margin-bottom: 14px; }
 .sidesection-title { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--faint); padding: 4px 11px; margin-bottom: 2px; }
@@ -636,6 +681,7 @@ section { padding: 52px 0; border-top: 1px solid var(--border-soft); }
 
 @media (max-width: 800px) {
   .split, .lanes, .arch-grid, .verdict-grid, .dim-cols, .gloss-grid, .pg-grid, .rosetta-grid, .lesson-grid, .paths, .std-grid { grid-template-columns: 1fr; }
+  .oauth-actors { grid-template-columns: repeat(2, 1fr); }
   .case-row { grid-template-columns: 1fr; gap: 2px; }
   .dim-col.h { border-right: none; border-bottom: 1px solid var(--border); }
   .matrix thead { display: none; }
