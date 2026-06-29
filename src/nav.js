@@ -26,6 +26,8 @@ export const NAV = [
     title: 'Practice',
     items: [
       { path: '/trace', id: 'trace', label: 'Access trace', icon: '❯', blurb: 'simulate a decision' },
+      { path: '/delegation', id: 'delegation', label: 'Delegation lab', icon: '⑃', blurb: 'scope down the chain' },
+      { path: '/oauth-flow', id: 'oauth-flow', label: 'OAuth flow', icon: '⇄', blurb: 'step through the dance' },
       { path: '/game', id: 'game', label: 'Defense game', icon: '⛨', blurb: 'block the breach' },
       { path: '/playground', id: 'playground', label: 'Config posture', icon: '⚙', blurb: 'tune & score' },
       { path: '/quiz', id: 'quiz', label: 'Quiz', icon: '✓', blurb: 'test yourself' },

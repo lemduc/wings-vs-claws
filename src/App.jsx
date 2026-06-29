@@ -16,6 +16,8 @@ import Lesson from './components/Lesson.jsx'
 import QuizPage from './components/QuizPage.jsx'
 import Cases from './components/Cases.jsx'
 import Standards from './components/Standards.jsx'
+import Delegation from './components/Delegation.jsx'
+import OAuthFlow from './components/OAuthFlow.jsx'
 
 function Overview() {
   return (<><Hero /><Verdict /></>)
@@ -38,6 +40,8 @@ export default function App() {
           <Route path="/standards" element={<Standards />} />
           <Route path="/journey" element={<Journey />} />
           <Route path="/trace" element={<Simulator />} />
+          <Route path="/delegation" element={<Delegation />} />
+          <Route path="/oauth-flow" element={<OAuthFlow />} />
           <Route path="/compare" element={<Compare />} />
           <Route path="/topology" element={<Architecture />} />
           <Route path="/playground" element={<Playground />} />

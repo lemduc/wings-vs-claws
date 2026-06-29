@@ -39,6 +39,14 @@ const PAGE_META = {
     title: 'Access trace simulator — agentic IAM in action',
     description: 'Pick an access scenario and watch each agent’s documented IAM controls gate it, layer by layer.',
   },
+  '/delegation': {
+    title: 'Delegation lab — scoped on-behalf-of, visualized',
+    description: 'See why narrowing scope on every hop (RFC 8693 token exchange) contains an agent’s blast radius as work flows to sub-agents.',
+  },
+  '/oauth-flow': {
+    title: 'OAuth flow lab — the Authorization Code dance',
+    description: 'Step through the OAuth 2.0 / OIDC Authorization Code flow one message at a time, from consent to scoped API access.',
+  },
   '/game': {
     title: 'Defense in Depth — an IAM mini-game',
     description: 'Block incoming threats by arming the right defensive layer. Learn the seven-layer model by playing it.',
