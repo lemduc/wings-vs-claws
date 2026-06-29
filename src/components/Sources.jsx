@@ -20,7 +20,7 @@ export default function Sources() {
         posture and defaults change quickly — verify against the official docs before relying on
         any control here.
       </p>
-      <p className="updated">Last updated {SITE.lastUpdated} · v{SITE.version} · <a href="https://github.com/lemduc/wings-vs-claws" target="_blank" rel="noreferrer">source on GitHub ↗</a></p>
+      <p className="updated">Last updated {SITE.lastUpdated} · v{SITE.version} · <a href="/changelog">changelog</a> · <a href="https://github.com/lemduc/wings-vs-claws/blob/main/CONTRIBUTING.md" target="_blank" rel="noreferrer">contribute</a> · <a href="https://github.com/lemduc/wings-vs-claws" target="_blank" rel="noreferrer">source ↗</a></p>
     </div>
   )
 }

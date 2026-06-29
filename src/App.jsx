@@ -1,4 +1,4 @@
-import { lazy } from 'react'
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout.jsx'
 
@@ -21,6 +21,8 @@ const Cases = lazy(() => import('./components/Cases.jsx'))
 const Standards = lazy(() => import('./components/Standards.jsx'))
 const Delegation = lazy(() => import('./components/Delegation.jsx'))
 const OAuthFlow = lazy(() => import('./components/OAuthFlow.jsx'))
+const Changelog = lazy(() => import('./components/Changelog.jsx'))
+const Embed = lazy(() => import('./components/Embed.jsx'))
 
 function Overview() {
   return (<><Hero /><Verdict /></>)
@@ -33,6 +35,15 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Bare embed route — no Layout chrome, for iframes */}
+        <Route
+          path="/embed/playground"
+          element={
+            <Suspense fallback={null}>
+              <Embed title="Config posture playground"><Playground /></Embed>
+            </Suspense>
+          }
+        />
         <Route element={<Layout />}>
           <Route path="/" element={<Overview />} />
           <Route path="/learn" element={<StartHere />} />
@@ -41,6 +52,7 @@ export default function App() {
           <Route path="/quiz" element={<QuizPage />} />
           <Route path="/cases" element={<Cases />} />
           <Route path="/standards" element={<Standards />} />
+          <Route path="/changelog" element={<Changelog />} />
           <Route path="/journey" element={<Journey />} />
           <Route path="/trace" element={<Simulator />} />
           <Route path="/delegation" element={<Delegation />} />

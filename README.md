@@ -1,44 +1,56 @@
 # Wings vs Claws 🪽🦞
 
-An interactive, source-grounded comparison of two open-source autonomous AI agents:
+**Learn IAM — from directories to agents.** An interactive, source-grounded learning
+hub for identity & access management in the AI-agent era, built around a comparison of
+two open-source agents: **Hermes Agent** (Nous Research) and **OpenClaw** (Peter Steinberger).
 
-- **🪽 Hermes Agent** — Nous Research's self-improving agent ("one agent, one memory, every surface")
-- **🦞 OpenClaw** — Peter Steinberger's local-first personal assistant (gateway → agent → subagents)
-
-> The winged, self-improving researcher's agent versus the clawed, local-first personal assistant.
+🔗 **Live:** https://wings-vs-claws.pages.dev
 
 ## What's inside
 
-- **Hero** — side-by-side positioning with sourced metadata (creator, license, version).
-- **Interactive task simulator** — pick a task (or type your own) and watch each agent's
-  *documented architecture* light up step by step. Traces are **illustrative** dramatizations
-  of each project's real design — not live runs.
-- **Side-by-side comparison table** — origin, architecture, memory, skills, backends, platforms.
-- **Feature matrix** — capability-by-capability (✓ / ◐ / —).
-- **Architecture diagrams** — two inline SVGs contrasting the agent topologies.
-- **Verdict** — short "which should you pick?" guidance.
-- **Cited sources** in the footer.
+- **Learn** — a *Start here* with learning paths by level, and **Foundations** lessons
+  (AuthN vs AuthZ, access models, federation/SSO, OAuth/OIDC, MFA, Zero Trust, workload
+  identity, NHIs, agent delegation) — each with a diagram, an "how it changes for agents"
+  twist, and a quiz.
+- **The journey** — IAM's evolution across seven eras, as a `git log`.
+- **Case study** — Hermes vs OpenClaw: access-trace simulator, diff + control matrix,
+  enforcement-topology diagrams.
+- **Practice** — delegation-chain visualizer, OAuth flow walkthrough, a Defense-in-Depth
+  game, a config-posture playground, and a cumulative quiz.
+- **Reference** — glossary (with inline hover-defs), standards radar, and case files.
+- Plus a ⌘K command palette, light/dark themes, progress tracking, and per-page SEO.
 
 ## Stack
 
-React 18 + Vite, plain CSS. All factual content lives in [`src/data.js`](src/data.js) so every
-claim is traceable to a source.
+React 18 + Vite + React Router, plain CSS. All content lives in `src/data.js` /
+`src/changelog.js` so every claim is traceable and easy to extend.
 
 ## Develop
 
 ```bash
 npm install
 npm run dev      # http://localhost:5173
-npm run build    # production build to dist/
-npm run preview  # preview the build
+npm run build    # regenerates sitemap + RSS, then builds to dist/
+npm run deploy   # build + deploy to Cloudflare Pages
 ```
 
-## Honesty & attribution
+## Embed
 
-This is an **independent, unofficial** demo. It is not affiliated with Nous Research or the
-OpenClaw project. Factual claims are drawn from each project's official site, docs, and GitHub
-(retrieved June 2026); the simulator presents illustrative architecture traces, not transcripts.
-Agent products evolve quickly — check the official sites for the latest:
+The config-posture playground is embeddable:
 
-- Hermes Agent: <https://hermes-agent.nousresearch.com/> · <https://github.com/nousresearch/hermes-agent>
-- OpenClaw: <https://openclawagent.net/> · <https://github.com/openclaw>
+```html
+<iframe src="https://wings-vs-claws.pages.dev/embed/playground"
+        width="100%" height="640" style="border:0" title="Agentic IAM posture"></iframe>
+```
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Content must be sourced; illustrative pieces are
+labeled as such. Releases are tracked in [CHANGELOG.md](CHANGELOG.md) and at `/changelog`.
+
+## Disclaimer
+
+Independent and unofficial — not affiliated with Nous Research or the OpenClaw project.
+IAM claims are drawn from each project's published security docs (retrieved June 2026);
+interactive pieces illustrate documented mechanisms, not live runs. Verify against the
+official docs before relying on any control here.

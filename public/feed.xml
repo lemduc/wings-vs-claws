@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Wings vs Claws — changelog</title>
+    <link>https://wings-vs-claws.pages.dev/changelog</link>
+    <description>Learn IAM — from directories to agents. An interactive, source-grounded guide to identity &amp; access management for the AI-agent era.</description>
+    <item>
+      <title>v0.3 — Polish, labs &amp; reach</title>
+      <link>https://wings-vs-claws.pages.dev/changelog</link>
+      <guid isPermaLink="false">wvc-v0.3</guid>
+      <pubDate>Mon, 29 Jun 2026 00:00:00 GMT</pubDate>
+      <description>&lt;ul&gt;&lt;li&gt;Interactive labs: delegation-chain visualizer and OAuth flow walkthrough.&lt;/li&gt;&lt;li&gt;Inline glossary auto-linking; three new foundation lessons; standards radar.&lt;/li&gt;&lt;li&gt;Route code-splitting, accessibility pass, per-page SEO, sitemap, and OG image.&lt;/li&gt;&lt;li&gt;Community: contribution guide, embeddable playground, this changelog + RSS.&lt;/li&gt;&lt;/ul&gt;</description>
+    </item>
+    <item>
+      <title>v0.2 — IAM learning hub</title>
+      <link>https://wings-vs-claws.pages.dev/changelog</link>
+      <guid isPermaLink="false">wvc-v0.2</guid>
+      <pubDate>Sun, 28 Jun 2026 00:00:00 GMT</pubDate>
+      <description>&lt;ul&gt;&lt;li&gt;Reorganized into a learning hub: start-here paths, foundation lessons, quizzes, progress tracking.&lt;/li&gt;&lt;li&gt;The journey page (IAM eras as a git-log) and the Rosetta Stone mapping.&lt;/li&gt;&lt;li&gt;Defense-in-Depth mini-game, config-posture playground, ⌘K palette, light/dark theme.&lt;/li&gt;&lt;/ul&gt;</description>
+    </item>
+    <item>
+      <title>v0.1 — Hermes vs OpenClaw</title>
+      <link>https://wings-vs-claws.pages.dev/changelog</link>
+      <guid isPermaLink="false">wvc-v0.1</guid>
+      <pubDate>Sat, 27 Jun 2026 00:00:00 GMT</pubDate>
+      <description>&lt;ul&gt;&lt;li&gt;Interactive IAM comparison: access-trace simulator, diff + control matrix, topology diagrams.&lt;/li&gt;&lt;/ul&gt;</description>
+    </item>
+  </channel>
+</rss>
