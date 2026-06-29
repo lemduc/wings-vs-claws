@@ -8,6 +8,9 @@ export const SITE = {
   baseUrl: 'https://wings-vs-claws.pages.dev',
   defaultDescription:
     'Learn IAM — from directories to agents. An interactive, source-grounded guide to identity & access management for the AI-agent era.',
+  ogImage: 'https://wings-vs-claws.pages.dev/og.svg',
+  lastUpdated: 'June 2026',
+  version: '0.3',
 }
 
 const PAGE_META = {

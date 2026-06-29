@@ -1,4 +1,5 @@
 import { SOURCES } from '../data.js'
+import { SITE } from '../seo.js'
 
 export default function Sources() {
   return (
@@ -19,6 +20,7 @@ export default function Sources() {
         posture and defaults change quickly — verify against the official docs before relying on
         any control here.
       </p>
+      <p className="updated">Last updated {SITE.lastUpdated} · v{SITE.version} · <a href="https://github.com/lemduc/wings-vs-claws" target="_blank" rel="noreferrer">source on GitHub ↗</a></p>
     </div>
   )
 }

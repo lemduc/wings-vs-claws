@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { NAV } from '../nav.js'
 import ThemeToggle from './ThemeToggle.jsx'
@@ -23,6 +23,7 @@ export default function Layout() {
     <div className="app">
       <Seo />
       <CommandPalette />
+      <a className="skip-link" href="#main">skip to content</a>
 
       <header className="topbar">
         <button className="hamburger" onClick={() => setNavOpen((o) => !o)} aria-label="Toggle navigation">≡</button>
@@ -68,8 +69,10 @@ export default function Layout() {
 
         {navOpen && <div className="scrim" onClick={() => setNavOpen(false)} />}
 
-        <main className="content">
-          <Outlet />
+        <main className="content" id="main">
+          <Suspense fallback={<div className="page-loading">loading<span className="caret" /></div>}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
     </div>
