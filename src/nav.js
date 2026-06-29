@@ -35,6 +35,7 @@ export const NAV = [
     title: 'Reference',
     items: [
       { path: '/glossary', id: 'glossary', label: 'Glossary', icon: '¶', blurb: 'IAM terms' },
+      { path: '/standards', id: 'standards', label: 'Standards radar', icon: '◎', blurb: 'protocols to watch' },
       { path: '/cases', id: 'cases', label: 'Case files', icon: '⚑', blurb: 'learn from breaches' },
     ],
   },

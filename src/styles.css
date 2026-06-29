@@ -475,6 +475,35 @@ section { padding: 52px 0; border-top: 1px solid var(--border-soft); }
 .ros-era { margin-left: auto; font-size: 10px; color: var(--purple); border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; }
 .ros-note { color: var(--muted); font-size: 12px; }
 
+/* ---------- Inline glossary links (Linkify) ---------- */
+.glink { position: relative; border-bottom: 1px dotted var(--hermes); color: var(--text); cursor: help; }
+.glink:hover, .glink:focus { color: var(--hermes); outline: none; }
+.glink::after {
+  content: attr(data-def);
+  position: absolute; left: 0; bottom: calc(100% + 8px); z-index: 30;
+  width: max-content; max-width: 280px;
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+  border-radius: 8px; padding: 9px 11px; font-size: 12px; line-height: 1.5; font-weight: 400;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  opacity: 0; transform: translateY(4px); pointer-events: none; transition: opacity .12s, transform .12s;
+}
+.glink:hover::after, .glink:focus::after { opacity: 1; transform: translateY(0); }
+
+/* ---------- Standards radar ---------- */
+.std-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.std { background: var(--panel); border: 1px solid var(--border); border-radius: 9px; padding: 14px 15px; border-left: 3px solid var(--border); }
+.std.tr-ent { border-left-color: var(--hermes); }
+.std.tr-agt { border-left-color: var(--claw); }
+.std.tr-both { border-left-color: var(--purple); }
+.std-top { display: flex; align-items: baseline; gap: 8px; margin-bottom: 3px; }
+.std-name { font-weight: 700; font-size: 13.5px; flex: 1; }
+.std-track { font-size: 10px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--border); }
+.std-track.tr-ent { color: var(--hermes); }
+.std-track.tr-agt { color: var(--claw); }
+.std-track.tr-both { color: var(--purple); }
+.std-status { font-size: 11px; color: var(--faint); margin-bottom: 7px; }
+.std-what { font-size: 12.5px; color: var(--muted); }
+
 /* ---------- Sidebar sections ---------- */
 .sidesection { margin-bottom: 14px; }
 .sidesection-title { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--faint); padding: 4px 11px; margin-bottom: 2px; }
@@ -606,7 +635,7 @@ section { padding: 52px 0; border-top: 1px solid var(--border-soft); }
 }
 
 @media (max-width: 800px) {
-  .split, .lanes, .arch-grid, .verdict-grid, .dim-cols, .gloss-grid, .pg-grid, .rosetta-grid, .lesson-grid, .paths { grid-template-columns: 1fr; }
+  .split, .lanes, .arch-grid, .verdict-grid, .dim-cols, .gloss-grid, .pg-grid, .rosetta-grid, .lesson-grid, .paths, .std-grid { grid-template-columns: 1fr; }
   .case-row { grid-template-columns: 1fr; gap: 2px; }
   .dim-col.h { border-right: none; border-bottom: 1px solid var(--border); }
   .matrix thead { display: none; }
