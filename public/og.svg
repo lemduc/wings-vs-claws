@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" font-family="'JetBrains Mono', ui-monospace, monospace">
+  <defs>
+    <radialgradient id="gb" cx="18%" cy="0%" r="70%"><stop offset="0%" stop-color="#1f6feb" stop-opacity="0.28"/><stop offset="100%" stop-color="#0d1117" stop-opacity="0"/></radialgradient>
+    <radialgradient id="go" cx="85%" cy="10%" r="70%"><stop offset="0%" stop-color="#f0883e" stop-opacity="0.22"/><stop offset="100%" stop-color="#0d1117" stop-opacity="0"/></radialgradient>
+  </defs>
+  <rect width="1200" height="630" fill="#0d1117"/>
+  <rect width="1200" height="630" fill="url(#gb)"/>
+  <rect width="1200" height="630" fill="url(#go)"/>
+  <g opacity="0.06" stroke="#58a6ff">
+    <path d="M0 90 H1200 M0 180 H1200 M0 270 H1200 M0 360 H1200 M0 450 H1200 M0 540 H1200"/>
+    <path d="M120 0 V630 M240 0 V630 M360 0 V630 M480 0 V630 M600 0 V630 M720 0 V630 M840 0 V630 M960 0 V630 M1080 0 V630" stroke="#f0883e"/>
+  </g>
+  <text x="80" y="150" font-size="26" fill="#6e7681">$ ./compare --topic=iam</text>
+  <text x="80" y="280" font-size="76" font-weight="800" fill="#58a6ff">Wings <tspan fill="#6e7681">vs</tspan> Claws</text>
+  <text x="80" y="370" font-size="46" font-weight="700" fill="#c9d1d9">Learn IAM — from directories to agents</text>
+  <text x="80" y="440" font-size="28" fill="#8b949e">Identity &amp; access management for the AI-agent era.</text>
+  <g transform="translate(80,500)">
+    <rect width="250" height="46" rx="8" fill="#161b22" stroke="#1f6feb"/>
+    <text x="20" y="30" font-size="22" fill="#58a6ff">🪽 Hermes Agent</text>
+    <rect x="274" width="250" height="46" rx="8" fill="#161b22" stroke="#bb5a1c"/>
+    <text x="294" y="30" font-size="22" fill="#f0883e">🦞 OpenClaw</text>
+  </g>
+  <circle cx="1120" cy="60" r="9" fill="#ff5f56"/><circle cx="1150" cy="60" r="9" fill="#ffbd2e"/><circle cx="1180" cy="60" r="9" fill="#27c93f"/>
+</svg>

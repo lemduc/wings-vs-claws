@@ -1,23 +1,26 @@
+import { lazy } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout.jsx'
-import Hero from './components/Hero.jsx'
-import Verdict from './components/Verdict.jsx'
-import Simulator from './components/Simulator.jsx'
-import Compare from './components/Compare.jsx'
-import Architecture from './components/Architecture.jsx'
-import Playground from './components/Playground.jsx'
-import Game from './components/Game.jsx'
-import Glossary from './components/Glossary.jsx'
-import Sources from './components/Sources.jsx'
-import Journey from './components/Journey.jsx'
-import StartHere from './components/StartHere.jsx'
-import Foundations from './components/Foundations.jsx'
-import Lesson from './components/Lesson.jsx'
-import QuizPage from './components/QuizPage.jsx'
-import Cases from './components/Cases.jsx'
-import Standards from './components/Standards.jsx'
-import Delegation from './components/Delegation.jsx'
-import OAuthFlow from './components/OAuthFlow.jsx'
+
+// Route-level code-splitting: each page loads as its own chunk on demand.
+const Hero = lazy(() => import('./components/Hero.jsx'))
+const Verdict = lazy(() => import('./components/Verdict.jsx'))
+const Simulator = lazy(() => import('./components/Simulator.jsx'))
+const Compare = lazy(() => import('./components/Compare.jsx'))
+const Architecture = lazy(() => import('./components/Architecture.jsx'))
+const Playground = lazy(() => import('./components/Playground.jsx'))
+const Game = lazy(() => import('./components/Game.jsx'))
+const Glossary = lazy(() => import('./components/Glossary.jsx'))
+const Sources = lazy(() => import('./components/Sources.jsx'))
+const Journey = lazy(() => import('./components/Journey.jsx'))
+const StartHere = lazy(() => import('./components/StartHere.jsx'))
+const Foundations = lazy(() => import('./components/Foundations.jsx'))
+const Lesson = lazy(() => import('./components/Lesson.jsx'))
+const QuizPage = lazy(() => import('./components/QuizPage.jsx'))
+const Cases = lazy(() => import('./components/Cases.jsx'))
+const Standards = lazy(() => import('./components/Standards.jsx'))
+const Delegation = lazy(() => import('./components/Delegation.jsx'))
+const OAuthFlow = lazy(() => import('./components/OAuthFlow.jsx'))
 
 function Overview() {
   return (<><Hero /><Verdict /></>)
