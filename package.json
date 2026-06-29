@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "node scripts/gen-sitemap.mjs",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "vite build && wrangler pages deploy dist --project-name wings-vs-claws"
+    "deploy": "npm run build && wrangler pages deploy dist --project-name wings-vs-claws"
   },
   "dependencies": {
     "react": "^18.3.1",
@@ -17,7 +18,7 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.1",
     "vite": "^5.4.2",
-    "wrangler": "^3.78.0"
+    "wrangler": "^4.105.0"
   },
   "allowScripts": {
     "esbuild@0.21.5": true

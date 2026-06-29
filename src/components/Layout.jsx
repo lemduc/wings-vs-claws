@@ -3,6 +3,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { NAV } from '../nav.js'
 import ThemeToggle from './ThemeToggle.jsx'
 import CommandPalette from './CommandPalette.jsx'
+import Seo from './Seo.jsx'
 
 function openPalette() {
   window.dispatchEvent(new CustomEvent('wvc:open-palette'))
@@ -20,6 +21,7 @@ export default function Layout() {
 
   return (
     <div className="app">
+      <Seo />
       <CommandPalette />
 
       <header className="topbar">
