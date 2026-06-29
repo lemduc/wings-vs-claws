@@ -59,6 +59,10 @@ const PAGE_META = {
     title: 'Case files — learn from agent & NHI breaches',
     description: 'Real and representative ways non-human identity goes wrong — and the one control that would have changed the outcome.',
   },
+  '/standards': {
+    title: 'Standards radar — protocols for agentic IAM',
+    description: 'OAuth, OIDC, token exchange, SPIFFE, MCP authorization, the OAuth on-behalf-of draft, and NIST — the standards shaping identity for AI agents.',
+  },
 }
 
 export function metaFor(pathname) {

@@ -468,6 +468,24 @@ export const LESSONS = [
     ],
   },
   {
+    slug: 'federation-sso', icon: '🤝', level: 'Foundation',
+    title: 'Federation & Single Sign-On',
+    tldr: 'Federation lets an identity from one place sign in somewhere else. SSO means one login works across many apps.',
+    sections: [
+      { h: 'The problem it solves', p: 'A directory stops at the org boundary. Federation lets a trusted identity provider (IdP) vouch for you to applications it doesn’t own, so you don’t need a separate account everywhere.' },
+      { h: 'SAML & OIDC', p: 'SAML (2005) and OpenID Connect carry signed assertions or tokens about who you are between the IdP and a relying party. The app trusts the IdP’s signature instead of checking a password itself.' },
+      { h: 'Single sign-on', p: 'Authenticate once at the IdP and reach many apps without re-entering credentials. Fewer passwords, central control, and one place to revoke access.' },
+    ],
+    flow: [{ label: 'IdP', sub: 'vouches' }, { label: 'Assertion', sub: 'signed claim' }, { label: 'App', sub: 'trusts IdP' }],
+    agentTwist: 'Agents complicate federation: an agent acting for you may need to present both its own identity and a federated claim about you — across services that each trust different identity providers.',
+    related: [{ to: '/learn/tokens-oauth', label: 'Tokens, OAuth & OIDC' }, { to: '/journey', label: 'Era 2 of the journey' }],
+    quiz: [
+      { q: 'Federation primarily lets you…', options: ['Use one identity across orgs/apps', 'Encrypt traffic', 'Store passwords'], answer: 0, explain: 'An IdP vouches for you to apps it doesn’t own.' },
+      { q: 'In SSO, you authenticate…', options: ['Once, then reach many apps', 'Separately for every app', 'Never'], answer: 0, explain: 'One login at the IdP unlocks many relying parties.' },
+      { q: 'SAML and OIDC carry…', options: ['Raw passwords', 'Signed assertions/tokens about you', 'Nothing'], answer: 1, explain: 'The app trusts the IdP’s signature, not a shared password.' },
+    ],
+  },
+  {
     slug: 'tokens-oauth', icon: '🎟️', level: 'Foundation',
     title: 'Tokens, OAuth 2.0 & OIDC',
     tldr: 'OAuth lets an app act on your behalf without your password, using scoped, expiring tokens. OIDC adds "who you are" on top.',
@@ -486,6 +504,24 @@ export const LESSONS = [
     ],
   },
   {
+    slug: 'mfa', icon: '🔐', level: 'Foundation',
+    title: 'MFA & step-up authentication',
+    tldr: 'Multi-factor auth requires more than one proof of identity. Step-up adds a fresh check right before a risky action.',
+    sections: [
+      { h: 'The three factors', p: 'Something you know (password), something you have (a device or passkey), something you are (biometric). MFA combines at least two, so a stolen password alone isn’t enough.' },
+      { h: 'Phishing resistance', p: 'Passkeys / FIDO2 bind the credential to the real site, defeating phishing that one-time codes (OTPs) still fall for. Not all factors are equal.' },
+      { h: 'Step-up', p: 'Re-verify just before a sensitive action — a transfer, a deletion — rather than trusting the original login forever. Risk-based, in the moment.' },
+    ],
+    flow: [{ label: 'Know', sub: 'password' }, { label: 'Have', sub: 'passkey' }, { label: 'Are', sub: 'biometric' }],
+    agentTwist: 'An agent can’t tap a phone or scan a face. Machine identity leans on cryptographic factors — keys, mTLS, attestation — and "step-up" becomes a human-in-the-loop approval before the agent does something dangerous.',
+    related: [{ to: '/learn/zero-trust', label: 'Zero Trust' }, { to: '/topology', label: 'Approval in the topology' }],
+    quiz: [
+      { q: 'MFA requires…', options: ['Two of the same factor', 'At least two different factors', 'Only a password'], answer: 1, explain: 'Combine ≥2 distinct factor types.' },
+      { q: 'Which is most phishing-resistant?', options: ['SMS one-time code', 'Passkey / FIDO2', 'Security question'], answer: 1, explain: 'Passkeys bind to the real site.' },
+      { q: 'For agents, "step-up" usually becomes…', options: ['A biometric scan', 'A human-in-the-loop approval', 'A longer password'], answer: 1, explain: 'A fresh human approval before a dangerous action.' },
+    ],
+  },
+  {
     slug: 'zero-trust', icon: '🛡️', level: 'Foundation',
     title: 'Zero Trust & least privilege',
     tldr: 'Never trust, always verify. Drop the network perimeter; make every request prove identity and context, and grant the least privilege that works.',
@@ -501,6 +537,24 @@ export const LESSONS = [
       { q: 'The Zero Trust motto is…', options: ['Trust but verify', 'Never trust, always verify', 'Trust the network'], answer: 1, explain: 'No implicit trust — verify every request.' },
       { q: 'Which NIST publication codified Zero Trust?', options: ['SP 800-53', 'SP 800-207', 'SP 800-63'], answer: 1, explain: 'SP 800-207 (2020) is the Zero Trust Architecture standard.' },
       { q: 'In Zero Trust, the new perimeter is…', options: ['The firewall', 'Identity', 'The VPN'], answer: 1, explain: 'Identity becomes the control plane.' },
+    ],
+  },
+  {
+    slug: 'workload-identity', icon: '📦', level: 'Foundation',
+    title: 'Workload identity & SPIFFE',
+    tldr: 'Workloads — services, containers, agents — need verifiable identity without baked-in secrets. SPIFFE gives them one.',
+    sections: [
+      { h: 'The hardcoded-secret problem', p: 'Stuffing an API key into a service is fragile: it leaks, never rotates, and is shared. Workloads need an identity they can prove cryptographically, not a stored password.' },
+      { h: 'SPIFFE / SPIRE', p: 'SPIFFE issues short-lived, verifiable IDs (SVIDs) to workloads based on what they are — attested by the platform — instead of a secret they hold. SPIRE is the runtime that hands them out.' },
+      { h: 'Why it matters', p: 'It’s Zero Trust for machines: identity the platform attests to, rotated automatically, with no long-lived shared secret to steal.' },
+    ],
+    flow: [{ label: 'Workload' }, { label: 'Attestation', sub: 'what it is' }, { label: 'SVID', sub: 'short-lived id' }],
+    agentTwist: 'An agent is a workload too. Giving agents attested, short-lived identities instead of long-lived API keys is one of the cleanest answers to the agent-credential problem — where SPIFFE-style workload identity meets the agent world.',
+    related: [{ to: '/learn/nhi', label: 'Non-human identities' }, { to: '/learn/zero-trust', label: 'Zero Trust' }],
+    quiz: [
+      { q: 'Workload identity aims to replace…', options: ['Hardcoded, long-lived secrets', 'Encryption', 'Usernames'], answer: 0, explain: 'Provable identity instead of stored secrets.' },
+      { q: 'A SPIFFE SVID is…', options: ['A long-lived password', 'A short-lived, verifiable workload ID', 'An API key'], answer: 1, explain: 'Short-lived and cryptographically verifiable.' },
+      { q: 'Workload identity is essentially…', options: ['Zero Trust for machines', 'A firewall', 'A VPN'], answer: 0, explain: 'Attested, rotating identity — Zero Trust applied to workloads.' },
     ],
   },
   {
@@ -539,6 +593,26 @@ export const LESSONS = [
       { q: 'What breaks if delegation is not recorded?', options: ['Token speed', 'The accountability chain', 'Encryption'], answer: 1, explain: 'Untracked delegation fractures accountability.' },
     ],
   },
+]
+
+// ── Standards radar: the protocols agentic IAM is being built on ────────────
+// track: 'enterprise' | 'agentic' | 'both'
+export const STANDARDS = [
+  { name: 'OAuth 2.0 / 2.1', status: 'established', track: 'both', what: 'Delegated, scoped access via tokens — the backbone agents build on.' },
+  { name: 'OpenID Connect', status: 'established', track: 'enterprise', what: 'Identity layer on OAuth — answers "who is the user?".' },
+  { name: 'RFC 8693 — Token Exchange', status: 'RFC (2020)', track: 'both', what: 'Swap a token for a narrower one — the basis for scoped sub-agent delegation.' },
+  { name: 'RFC 8707 — Resource Indicators', status: 'RFC (2020)', track: 'enterprise', what: 'Bind a token to a specific audience/resource, limiting where it can be replayed.' },
+  { name: 'OAuth on-behalf-of user (AI agents)', status: 'IETF draft · 2025', track: 'agentic', what: 'Adds act / requested_actor / actor_token so a token carries the user → agent delegation chain.' },
+  { name: 'MCP Authorization', status: 'spec · 2025-11', track: 'agentic', what: 'An OAuth 2.1 profile for the Model Context Protocol — how agent clients get scoped access to tools and servers.' },
+  { name: 'SPIFFE / SPIRE', status: 'CNCF', track: 'enterprise', what: 'Verifiable, short-lived workload identity (SVIDs) without stored secrets.' },
+  { name: 'NIST AI Agent Standards Initiative', status: 'launched · Feb 2026', track: 'agentic', what: 'Early US-government work toward governing autonomous-agent identity and action.' },
+]
+
+export const STANDARDS_SOURCES = [
+  { label: 'IETF — OAuth On-Behalf-Of User for AI Agents (draft)', url: 'https://www.ietf.org/archive/id/draft-oauth-ai-agents-on-behalf-of-user-01.html' },
+  { label: 'Model Context Protocol — Authorization', url: 'https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization' },
+  { label: 'RFC 8693 — OAuth 2.0 Token Exchange', url: 'https://www.rfc-editor.org/rfc/rfc8693' },
+  { label: 'SPIFFE — Secure Production Identity Framework', url: 'https://spiffe.io/' },
 ]
 
 // ── Case files: learn from real (and representative) failures ───────────────

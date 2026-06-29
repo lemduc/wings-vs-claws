@@ -15,6 +15,7 @@ import Foundations from './components/Foundations.jsx'
 import Lesson from './components/Lesson.jsx'
 import QuizPage from './components/QuizPage.jsx'
 import Cases from './components/Cases.jsx'
+import Standards from './components/Standards.jsx'
 
 function Overview() {
   return (<><Hero /><Verdict /></>)
@@ -34,6 +35,7 @@ export default function App() {
           <Route path="/learn/:slug" element={<Lesson />} />
           <Route path="/quiz" element={<QuizPage />} />
           <Route path="/cases" element={<Cases />} />
+          <Route path="/standards" element={<Standards />} />
           <Route path="/journey" element={<Journey />} />
           <Route path="/trace" element={<Simulator />} />
           <Route path="/compare" element={<Compare />} />

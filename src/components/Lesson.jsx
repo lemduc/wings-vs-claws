@@ -3,6 +3,7 @@ import { Link, useParams, Navigate } from 'react-router-dom'
 import { LESSONS } from '../data.js'
 import { markViewed } from '../progress.js'
 import Quiz from './Quiz.jsx'
+import Linkify from './Linkify.jsx'
 
 function Flow({ steps }) {
   return (
@@ -49,14 +50,14 @@ export default function Lesson() {
         {lesson.sections.map((s) => (
           <div className="lesson-sec" key={s.h}>
             <h3>{s.h}</h3>
-            <p>{s.p}</p>
+            <p><Linkify text={s.p} /></p>
           </div>
         ))}
       </div>
 
       <div className="agent-twist">
         <div className="at-head">🤖 how it changes for agents</div>
-        <p>{lesson.agentTwist}</p>
+        <p><Linkify text={lesson.agentTwist} /></p>
       </div>
 
       <Quiz questions={lesson.quiz} id={`lesson:${lesson.slug}`} title={`check: ${lesson.title}`} />
