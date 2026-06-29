@@ -561,6 +561,21 @@ section { padding: 52px 0; border-top: 1px solid var(--border-soft); }
 .ot-dot.on { background: var(--hermes); border-color: var(--hermes); }
 .oauth-actions { display: flex; gap: 10px; justify-content: center; }
 
+/* ---------- Changelog ---------- */
+.cl-list { display: flex; flex-direction: column; gap: 18px; }
+.cl-rel { background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--hermes); border-radius: 9px; padding: 14px 16px; }
+.cl-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+.cl-ver { font-weight: 800; color: var(--hermes); font-size: 15px; }
+.cl-title { font-weight: 700; }
+.cl-date { margin-left: auto; color: var(--faint); font-size: 12px; }
+.cl-items { margin: 0; padding-left: 18px; }
+.cl-items li { color: var(--muted); font-size: 13px; margin: 4px 0; }
+
+/* ---------- Embed (iframe target) ---------- */
+.embed { padding: 16px; }
+.embed-credit { display: inline-block; margin-top: 8px; font-family: var(--mono); font-size: 11px; color: var(--faint); }
+.embed-credit:hover { color: var(--hermes); }
+
 /* ---------- Sidebar sections ---------- */
 .sidesection { margin-bottom: 14px; }
 .sidesection-title { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--faint); padding: 4px 11px; margin-bottom: 2px; }

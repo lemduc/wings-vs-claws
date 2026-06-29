@@ -74,6 +74,10 @@ const PAGE_META = {
     title: 'Standards radar — protocols for agentic IAM',
     description: 'OAuth, OIDC, token exchange, SPIFFE, MCP authorization, the OAuth on-behalf-of draft, and NIST — the standards shaping identity for AI agents.',
   },
+  '/changelog': {
+    title: 'Changelog — what’s new',
+    description: 'Release notes for Wings vs Claws, the interactive agentic-IAM learning hub. Subscribe via RSS.',
+  },
 }
 
 export function metaFor(pathname) {
