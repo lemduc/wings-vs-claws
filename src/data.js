@@ -496,6 +496,23 @@ export const LESSONS = [
     ],
     flow: [{ label: 'User consents' }, { label: 'Authz server', sub: 'issues token' }, { label: 'App / agent', sub: 'scoped token' }, { label: 'Resource', sub: 'checks scope' }],
     agentTwist: 'Agents are the ultimate "app acting on your behalf" — but classic OAuth never imagined an agent that delegates to sub-agents. New work (the OAuth on-behalf-of-user draft, MCP’s OAuth 2.1 profile, RFC 8693 token exchange) makes tokens carry a delegation chain so you can trace user → agent → sub-agent.',
+    code: {
+      label: 'in practice — exchanging a code for a scoped token (PKCE)',
+      body: `POST /oauth/token
+  grant_type=authorization_code
+  code=AUTH_CODE
+  redirect_uri=https://app.example/callback
+  code_verifier=PKCE_VERIFIER      # public clients: no secret
+
+→ 200 OK
+{
+  "access_token": "eyJhbGciOi...",
+  "token_type":   "Bearer",
+  "expires_in":   3600,
+  "scope":        "calendar:read",   # the permission boundary
+  "id_token":     "eyJ..."           # only with OIDC
+}`,
+    },
     related: [{ to: '/learn/agent-delegation', label: 'Agent delegation' }, { to: '/journey', label: 'Where this fits in the journey' }],
     quiz: [
       { q: 'OAuth 2.0 is primarily a framework for…', options: ['Authentication', 'Authorization / delegated access', 'Encryption'], answer: 1, explain: 'OAuth delegates scoped access; OIDC adds authentication.' },
@@ -550,6 +567,15 @@ export const LESSONS = [
     ],
     flow: [{ label: 'Workload' }, { label: 'Attestation', sub: 'what it is' }, { label: 'SVID', sub: 'short-lived id' }],
     agentTwist: 'An agent is a workload too. Giving agents attested, short-lived identities instead of long-lived API keys is one of the cleanest answers to the agent-credential problem — where SPIFFE-style workload identity meets the agent world.',
+    code: {
+      label: 'in practice — a workload fetching its SPIFFE identity (no secret)',
+      body: `# the workload asks the local SPIFFE Workload API for its SVID
+$ grpcurl -unix /run/spire/agent.sock \\
+    SpiffeWorkloadAPI/FetchX509SVID
+
+→ spiffe_id: spiffe://example.org/ns/prod/sa/mailer
+   x509_svid: <short-lived cert, auto-rotated>   # identity, not a stored key`,
+    },
     related: [{ to: '/learn/nhi', label: 'Non-human identities' }, { to: '/learn/zero-trust', label: 'Zero Trust' }],
     quiz: [
       { q: 'Workload identity aims to replace…', options: ['Hardcoded, long-lived secrets', 'Encryption', 'Usernames'], answer: 0, explain: 'Provable identity instead of stored secrets.' },
@@ -586,6 +612,19 @@ export const LESSONS = [
     ],
     flow: [{ label: 'User', sub: 'consents' }, { label: 'Agent', sub: 'act = agent' }, { label: 'Sub-agent', sub: 'narrowed scope' }, { label: 'Resource' }],
     agentTwist: 'This is the agentic frontier. Hermes scopes sub-agents via cross-session isolation; OpenClaw uses explicit delegation plus visibility: self / tree / agent / all. Both are early answers to a problem standards are still racing to solve.',
+    code: {
+      label: 'in practice — the delegation (act) chain inside a token',
+      body: `// decoded access-token claims (RFC 8693 / on-behalf-of)
+{
+  "sub":   "user:duc",                // the human it acts for
+  "act": {                            // the actor — the agent
+    "sub": "agent:orchestrator",
+    "act": { "sub": "agent:drafting-subagent" }  // nested = multi-hop
+  },
+  "scope": "mail:send",               // narrowed to just what's needed
+  "aud":   "https://mail.example"
+}`,
+    },
     related: [{ to: '/compare', label: 'How Hermes & OpenClaw handle it' }, { to: '/journey', label: 'Era 6 of the journey' }],
     quiz: [
       { q: 'An agent acting "on-behalf-of" a user means authorization must capture…', options: ['Just the agent', 'The user’s consent and the agent’s identity', 'Only the resource'], answer: 1, explain: 'Both the delegating user and the agent matter.' },

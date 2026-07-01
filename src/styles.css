@@ -620,6 +620,13 @@ section { padding: 52px 0; border-top: 1px solid var(--border-soft); }
 .next-lesson { text-decoration: none; padding: 9px 15px; }
 .next-lesson:hover { text-decoration: none; }
 
+/* ---------- Lesson "in practice" code block ---------- */
+.lesson-code { margin: 0 0 26px; border: 1px solid var(--border); border-radius: 9px; overflow: hidden; background: var(--bg-soft); }
+.lc-label { padding: 8px 14px; background: var(--panel-2); border-bottom: 1px solid var(--border); font-size: 12px; color: var(--muted); }
+.lc-label::before { content: '// '; color: var(--faint); }
+.lesson-code pre { margin: 0; padding: 14px; overflow-x: auto; }
+.lesson-code code { font-family: var(--mono); font-size: 12.5px; line-height: 1.6; color: var(--text); white-space: pre; }
+
 /* ---------- Quiz ---------- */
 .quiz { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
 .quiz-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
