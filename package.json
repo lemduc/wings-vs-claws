@@ -7,8 +7,9 @@
     "dev": "vite",
     "prebuild": "node scripts/gen-sitemap.mjs && node scripts/gen-feed.mjs",
     "build": "vite build",
+    "postbuild": "node scripts/prerender.mjs",
     "preview": "vite preview",
-    "deploy": "npm run build && wrangler pages deploy dist --project-name wings-vs-claws"
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "react": "^18.3.1",
