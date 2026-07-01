@@ -1,5 +1,16 @@
-# Cloudflare Pages config for `wrangler pages deploy`.
-# Static Vite build — no Workers runtime needed.
+# Cloudflare Workers (Static Assets) config — `wrangler deploy`.
+# Serves the Vite build via a small Worker that adds security headers, with
+# SPA fallback handled by not_found_handling.
 name = "wings-vs-claws"
-pages_build_output_dir = "dist"
-compatibility_date = "2026-06-27"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+# Attach the custom domain (requires the vjsonline.org zone in this account).
+routes = [
+  { pattern = "iam.vjsonline.org", custom_domain = true },
+]

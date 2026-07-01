@@ -3,3 +3,8 @@ dist
 *.log
 .DS_Store
 .vite
+
+# env
+.env
+.env.*
+.dev.vars
