@@ -38,6 +38,6 @@ and `src/changelog.js`, so add new routes/releases there.
 The config-posture playground can be embedded anywhere via iframe:
 
 ```html
-<iframe src="https://wings-vs-claws.pages.dev/embed/playground"
+<iframe src="https://iam.vjsonline.org/embed/playground"
         width="100%" height="640" style="border:0" title="Agentic IAM posture"></iframe>
 ```
