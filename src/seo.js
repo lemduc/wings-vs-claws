@@ -4,11 +4,10 @@ import { LESSONS } from './data.js'
 
 export const SITE = {
   name: 'Wings vs Claws',
-  // Update this when a custom domain is wired up.
-  baseUrl: 'https://wings-vs-claws.pages.dev',
+  baseUrl: 'https://iam.vjsonline.org',
   defaultDescription:
     'Learn IAM — from directories to agents. An interactive, source-grounded guide to identity & access management for the AI-agent era.',
-  ogImage: 'https://wings-vs-claws.pages.dev/og.svg',
+  ogImage: 'https://iam.vjsonline.org/og.svg',
   lastUpdated: 'June 2026',
   version: '0.3',
 }

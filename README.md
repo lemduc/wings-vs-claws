@@ -4,7 +4,7 @@
 hub for identity & access management in the AI-agent era, built around a comparison of
 two open-source agents: **Hermes Agent** (Nous Research) and **OpenClaw** (Peter Steinberger).
 
-🔗 **Live:** https://wings-vs-claws.pages.dev
+🔗 **Live:** https://iam.vjsonline.org
 
 ## What's inside
 
@@ -39,7 +39,7 @@ npm run deploy   # build + deploy to Cloudflare Pages
 The config-posture playground is embeddable:
 
 ```html
-<iframe src="https://wings-vs-claws.pages.dev/embed/playground"
+<iframe src="https://iam.vjsonline.org/embed/playground"
         width="100%" height="640" style="border:0" title="Agentic IAM posture"></iframe>
 ```
 
