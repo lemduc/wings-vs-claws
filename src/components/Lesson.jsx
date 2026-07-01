@@ -60,6 +60,13 @@ export default function Lesson() {
         <p><Linkify text={lesson.agentTwist} /></p>
       </div>
 
+      {lesson.code && (
+        <div className="lesson-code">
+          <div className="lc-label">{lesson.code.label}</div>
+          <pre><code>{lesson.code.body}</code></pre>
+        </div>
+      )}
+
       <Quiz questions={lesson.quiz} id={`lesson:${lesson.slug}`} title={`check: ${lesson.title}`} />
 
       <div className="lesson-foot">
