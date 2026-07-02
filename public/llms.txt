@@ -1,0 +1,33 @@
+# Wings vs Claws
+
+> Learn IAM — from directories to agents. An interactive, source-grounded guide to identity & access management for the AI-agent era.
+
+An interactive learning hub for identity & access management (IAM) in the
+AI-agent era, built around a source-grounded comparison of two open-source
+agents (Hermes Agent, OpenClaw). Content is written by an IAM practitioner;
+factual claims trace to primary sources.
+
+## Lessons
+
+- [Authentication vs Authorization](https://iam.vjsonline.org/md/authn-vs-authz.md): Authentication proves who you are. Authorization decides what you may do. Agents add a third question: who are you acting for?
+- [Access models: ACL, RBAC, ABAC](https://iam.vjsonline.org/md/access-models.md): Three ways to express "who can do what" — lists, roles, and policies — trading simplicity for flexibility.
+- [Federation & Single Sign-On](https://iam.vjsonline.org/md/federation-sso.md): Federation lets an identity from one place sign in somewhere else. SSO means one login works across many apps.
+- [Tokens, OAuth 2.0 & OIDC](https://iam.vjsonline.org/md/tokens-oauth.md): OAuth lets an app act on your behalf without your password, using scoped, expiring tokens. OIDC adds "who you are" on top.
+- [MFA & step-up authentication](https://iam.vjsonline.org/md/mfa.md): Multi-factor auth requires more than one proof of identity. Step-up adds a fresh check right before a risky action.
+- [Zero Trust & least privilege](https://iam.vjsonline.org/md/zero-trust.md): Never trust, always verify. Drop the network perimeter; make every request prove identity and context, and grant the least privilege that works.
+- [Workload identity & SPIFFE](https://iam.vjsonline.org/md/workload-identity.md): Workloads — services, containers, agents — need verifiable identity without baked-in secrets. SPIFFE gives them one.
+- [Non-human identities (NHIs)](https://iam.vjsonline.org/md/nhi.md): Most identities are not people — they are service accounts, API keys, workloads, and now agents. They outnumber humans 100:1+ and are a top breach vector.
+- [Delegation & on-behalf-of for agents](https://iam.vjsonline.org/md/agent-delegation.md): Agents act for you and hand work to sub-agents. The hard part: carry authority down the chain without over-granting — and keep it auditable.
+
+## Reference
+
+- [IAM glossary](https://iam.vjsonline.org/md/glossary.md): agentic identity terms, defined
+- [The journey of IAM](https://iam.vjsonline.org/md/journey.md): seven eras, from ACLs to agents
+- [Hermes vs OpenClaw comparison](https://iam.vjsonline.org/md/comparison.md): eight IAM dimensions side by side
+- [Standards radar](https://iam.vjsonline.org/md/standards.md): OAuth, token exchange, MCP auth, SPIFFE, NIST
+- [Case files](https://iam.vjsonline.org/md/cases.md): real & representative agent/NHI incidents
+
+## Optional
+
+- [Changelog](https://iam.vjsonline.org/changelog): release notes
+- [RSS feed](https://iam.vjsonline.org/feed.xml)

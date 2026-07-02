@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { AGENTS } from '../data.js'
 
 function AgentCard({ id }) {
@@ -41,6 +42,14 @@ export default function Hero() {
         <span className="tok-blue">authentication, authorization, secrets, isolation, and delegation</span>.
         Code-level, IAM-only.
       </p>
+      <nav className="hero-router" aria-label="Pick a learning path">
+        <span className="hr-label">start where you are:</span>
+        <Link className="hr-btn" to="/learn/authn-vs-authz">🌱 new to IAM</Link>
+        <Link className="hr-btn" to="/learn/nhi">🤖 know IAM, new to agents</Link>
+        <Link className="hr-btn" to="/compare">🛠️ practitioner — straight to the diff</Link>
+        <Link className="hr-all" to="/learn">all paths →</Link>
+      </nav>
+
       <div className="split">
         <AgentCard id="hermes" />
         <AgentCard id="openclaw" />
