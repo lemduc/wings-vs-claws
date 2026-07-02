@@ -422,7 +422,7 @@ export const ROSETTA = [
 
 export const JOURNEY_SOURCES = [
   { label: 'Insight Partners — IAM in the age of AI agents', url: 'https://www.insightpartners.com/ideas/iam-ai-agents/' },
-  { label: 'Aembit — IAM for Agentic AI', url: 'https://aembit.io/blog/iam-agentic-ai/' },
+  { label: 'CSO Online — NHIs: the biggest security blind spot in 2026', url: 'https://www.csoonline.com/article/4125156/why-non-human-identities-are-your-biggest-security-blind-spot-in-2026.html' },
   { label: 'IETF — OAuth On-Behalf-Of User Authorization for AI Agents (draft)', url: 'https://www.ietf.org/archive/id/draft-oauth-ai-agents-on-behalf-of-user-01.html' },
   { label: 'Model Context Protocol — Authorization spec', url: 'https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization' },
   { label: 'Research: 44% NHI growth, 144:1 ratio (2024→2025)', url: 'https://www.cybersecuritytribe.com/news/research-reveals-44-growth-in-nhis-from-2024-to-2025' },

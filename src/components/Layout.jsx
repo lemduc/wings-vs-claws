@@ -33,7 +33,10 @@ export default function Layout() {
         </NavLink>
         <div className="topbar-right">
           <ThemeToggle />
-          <button className="kbtn" onClick={openPalette} aria-label="Open command palette">⌘K</button>
+          <button className="kbtn" onClick={openPalette} aria-label="Open search">
+            <span className="kbtn-full">⌘K</span>
+            <span className="kbtn-mini">🔍</span>
+          </button>
         </div>
       </header>
 

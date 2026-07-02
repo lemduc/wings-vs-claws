@@ -23,9 +23,10 @@ const Delegation = lazy(() => import('./components/Delegation.jsx'))
 const OAuthFlow = lazy(() => import('./components/OAuthFlow.jsx'))
 const Changelog = lazy(() => import('./components/Changelog.jsx'))
 const Embed = lazy(() => import('./components/Embed.jsx'))
+const About = lazy(() => import('./components/About.jsx'))
 
 function Overview() {
-  return (<><Hero /><Verdict /></>)
+  return (<><Hero /><Verdict /><About /></>)
 }
 function GlossaryPage() {
   return (<><Glossary /><Sources /></>)
