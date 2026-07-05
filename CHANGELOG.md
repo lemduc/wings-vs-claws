@@ -3,6 +3,29 @@
 All notable changes to Wings vs Claws. The site is an interactive, source-grounded
 guide to IAM for the AI-agent era.
 
+## v0.4 — July 2026
+
+### Fact-check refresh
+Every agent claim re-verified against live primary docs (July 2026).
+
+- **OpenClaw corrections**: credential store is the per-agent SQLite database
+  (`openclaw-agent.sqlite`; the `~/.openclaw/credentials/` JSON path is legacy,
+  migrated by `openclaw doctor --fix`) — with the honest caveat that plaintext
+  still works and agent-readable files stay exposed. License shown as MIT.
+  SecretRef marked static-credentials-only (OAuth profiles can't use it).
+- **Hermes additions**: Daytona joins the backend list; approval prompts fail
+  closed (deny) after 60s; dashboard/remote auth documented (Nous Portal OAuth,
+  self-hosted OIDC, basic auth — fails closed on non-loopback bind; `--insecure`
+  is a deprecated no-op since the June 2026 hardening).
+- **Symmetry fix**: both isolation cells now state sandboxing is opt-in —
+  Hermes defaults to an unisolated `local` backend (containers run as root
+  unless `docker_run_as_host_user`), OpenClaw ships `sandbox.mode: "off"`.
+- **Two new real-incident case files**: the Vidar infostealer sweep of an
+  OpenClaw state directory (Hudson Rock, Feb 2026 — first documented infostealer
+  harvest of an AI agent's credentials and memory) and ClawHub's top-ranked
+  skill caught exfiltrating data (Cisco, Jan 2026; Snyk's ToxicSkills on the
+  no-vetting marketplace).
+
 ## v0.3 — June 2026
 
 ### Phase 3 — Polish & reach

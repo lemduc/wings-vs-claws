@@ -5,6 +5,13 @@
     <link>https://iam.vjsonline.org/changelog</link>
     <description>Learn IAM — from directories to agents. An interactive, source-grounded guide to identity &amp; access management for the AI-agent era.</description>
     <item>
+      <title>v0.4 — Fact-check refresh</title>
+      <link>https://iam.vjsonline.org/changelog</link>
+      <guid isPermaLink="false">wvc-v0.4</guid>
+      <pubDate>Mon, 06 Jul 2026 00:00:00 GMT</pubDate>
+      <description>&lt;ul&gt;&lt;li&gt;Re-verified every agent claim against live primary docs (July 2026) after a deep fact-check pass.&lt;/li&gt;&lt;li&gt;OpenClaw: credential store corrected to the per-agent SQLite database (plaintext JSON is legacy); license shown as MIT; SecretRef noted as static-credentials-only.&lt;/li&gt;&lt;li&gt;Hermes: added Daytona backend, the 60s fail-closed approval timeout, and dashboard auth (Nous Portal OAuth / self-hosted OIDC / basic; --insecure now a no-op).&lt;/li&gt;&lt;li&gt;Both isolation cells now say sandboxing is opt-in — Hermes defaults to an unisolated local backend, OpenClaw ships with sandbox.mode "off".&lt;/li&gt;&lt;li&gt;Two new real-incident case files: the Vidar infostealer sweep of an OpenClaw state dir (Hudson Rock, Feb 2026) and ClawHub’s exfiltrating #1 skill (Cisco, Jan 2026).&lt;/li&gt;&lt;/ul&gt;</description>
+    </item>
+    <item>
       <title>v0.3 — Polish, labs &amp; reach</title>
       <link>https://iam.vjsonline.org/changelog</link>
       <guid isPermaLink="false">wvc-v0.3</guid>
