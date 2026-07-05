@@ -2,11 +2,14 @@
 // Wings vs Claws — an IAM-focused comparison of two open-source agents.
 // Every claim below is traceable to the projects' own security docs + guides.
 //
-// Sources (retrieved June 2026):
+// Sources (retrieved June 2026; re-verified against live docs July 2026):
 //   Hermes:   https://hermes-agent.nousresearch.com/docs/user-guide/security
+//             https://hermes-agent.nousresearch.com/docs/user-guide/configuration
 //             https://github.com/NousResearch/hermes-agent/blob/main/SECURITY.md
 //   OpenClaw: https://docs.openclaw.ai/gateway/security
 //             https://docs.openclaw.ai/gateway/sandboxing
+//             https://docs.openclaw.ai/gateway/authentication
+//             https://docs.openclaw.ai/auth-credential-semantics
 //
 // Scope: Identity & Access Management ONLY — authN, authZ/RBAC, tool
 // permissions, secrets, isolation, delegation, audit, default posture.
@@ -37,7 +40,7 @@ export const AGENTS = {
     file: 'openclaw.iam',
     symbol: '🦞',
     creator: 'Peter Steinberger',
-    license: 'Open source',
+    license: 'MIT',
     iamModel: 'Gateway RBAC + 3 permission gates',
     motto: 'One trusted operator, least privilege, widen on confidence.',
     blurb:
@@ -56,7 +59,7 @@ export const IAM_DIMENSIONS = [
     dimension: 'Authentication',
     sub: 'Who is allowed to talk to the agent at all',
     hermes:
-      'Gateway checks a strict order: per-platform allow-all → DM-pairing list → platform allowlist → global allowlist → global allow-all → deny. DM pairing issues an 8-char code (1h TTL, rate-limited, 5 fails → 1h lockout, file chmod 0600).',
+      'Gateway checks a strict order: per-platform allow-all → DM-pairing list → platform allowlist → global allowlist → global allow-all → deny. DM pairing issues an 8-char code (1h TTL, rate-limited, 5 fails → 1h lockout, file chmod 0600). Dashboard/remote UI: OAuth (Nous Portal), self-hosted OIDC against your own IdP, or basic auth — fails closed if bound non-loopback with no provider; the old --insecure bypass is a deprecated no-op (June 2026 hardening).',
     openclaw:
       'Gateway auth modes: token, password, or trusted-proxy identity. New senders must approve a pairing code (1h TTL, max 3 pending), or use a strict allowlist; "open" requires an explicit "*" opt-in.',
   },
@@ -74,7 +77,7 @@ export const IAM_DIMENSIONS = [
     dimension: 'Tool / action permissions',
     sub: "The principal's blast radius",
     hermes:
-      'Dangerous-command approval modes: manual (default, always prompt), smart (LLM risk score → auto allow/deny), off (--yolo). A hardline blocklist (rm -rf /, fork bombs, disk format) is refused even under --yolo.',
+      'Dangerous-command approval modes: manual (default, always prompt), smart (LLM risk score → auto allow/deny), off (--yolo). Approval prompts fail closed — deny — after a 60s timeout. A hardline blocklist (rm -rf /, fork bombs, disk format) is refused even under --yolo.',
     openclaw:
       'Three independent permission gates: agent-level tool allow/deny, sandbox-level tool filter, and container network access — all must permit an action. Default "messaging" profile disables automation/runtime/fs groups; tools.elevated bypass is off by default.',
   },
@@ -85,16 +88,16 @@ export const IAM_DIMENSIONS = [
     hermes:
       'MCP subprocesses receive only safe vars (PATH, HOME, USER, LANG, TERM, SHELL, TMPDIR, XDG_*); everything with KEY/TOKEN/SECRET/PASSWORD is stripped. Skills declare required_environment_variables / required_credential_files; files mount read-only. Errors redact ghp_…, sk-…, bearer tokens.',
     openclaw:
-      'Secrets live in ~/.openclaw/credentials/ or behind SecretRef providers (env / file / exec), injected at runtime — never in config files. Untrusted workspace .env files cannot override OPENCLAW_* or provider credentials.',
+      'Provider credentials live in a per-agent SQLite store (openclaw-agent.sqlite; legacy JSON is migrated via `openclaw doctor --fix`) or behind SecretRef providers (env / file / exec — static credentials only), injected at runtime. Plaintext still works, and agent-readable files (openclaw.json, .env) stay exposed. Untrusted workspace .env files cannot override OPENCLAW_* or provider credentials.',
   },
   {
     id: 'isolation',
     dimension: 'Execution isolation',
     sub: 'Sandboxing & resource boundaries',
     hermes:
-      'Hardened containers: --cap-drop ALL, --security-opt no-new-privileges, --pids-limit 256, tmpfs /tmp with nosuid. Backends: local / ssh / docker / singularity / modal. SSRF guard blocks RFC-1918, loopback, link-local, and cloud-metadata addresses.',
+      'Default backend is local — commands run on the host with no isolation; containers are an opt-in switch. When used, hardened: --cap-drop ALL, --security-opt no-new-privileges, --pids-limit 256, tmpfs /tmp with nosuid (root inside unless docker_run_as_host_user). Backends: local / ssh / docker / singularity / modal / daytona. SSRF guard blocks RFC-1918, loopback, link-local, and cloud-metadata addresses.',
     openclaw:
-      'Sandbox scope: agent / session / shared. Workspace access: none / ro / rw. Host target: sandbox (Docker) / gateway (host) / node (remote). Docker network is disabled by default, so even allowed web tools fail until opened.',
+      'Sandboxing is off by default (agents.defaults.sandbox.mode: "off") — an opt-in switch, like Hermes. When enabled: sandbox scope agent / session / shared, workspace access none / ro / rw, host target sandbox (Docker) / gateway (host) / node (remote). Docker network is disabled by default, so even allowed web tools fail until opened.',
   },
   {
     id: 'principal',
@@ -154,7 +157,7 @@ export const IAM_MATRIX = [
 export const HERMES_LAYERS = [
   { short: 'User authorization', full: 'allowlists + DM pairing' },
   { short: 'Command approval', full: 'manual / smart / off' },
-  { short: 'Container isolation', full: 'docker / singularity / modal' },
+  { short: 'Container isolation', full: 'docker / singularity / modal / daytona (opt-in)' },
   { short: 'Credential filtering', full: 'strip secrets from subprocess env' },
   { short: 'Context scanning', full: 'prompt-injection detection' },
   { short: 'Session isolation', full: 'no shared state, no traversal' },
@@ -204,7 +207,7 @@ export const TRACES = {
       { tag: 'redact', verb: 'SCRUB', line: 'errors mask ghp_… / sk-… / bearer → [REDACTED]' },
     ],
     openclaw: [
-      { tag: 'store', verb: 'RESOLVE', line: 'SecretRef provider (env / file / exec) or ~/.openclaw/credentials/' },
+      { tag: 'store', verb: 'RESOLVE', line: 'SecretRef provider (env / file / exec) or per-agent SQLite store (openclaw-agent.sqlite)' },
       { tag: 'block', verb: 'REJECT', line: 'workspace .env cannot override OPENCLAW_* / provider creds' },
       { tag: 'inject', verb: 'INJECT', line: 'value injected at runtime — never written to config files' },
       { tag: 'gate', verb: 'CHECK', line: 'sandbox tool filter must also permit the consuming tool' },
@@ -281,7 +284,7 @@ export const GLOSSARY = [
   { term: 'Non-human identity', rel: 'openclaw', def: 'An autonomous agent treated as a security principal that takes actions and touches data. OpenClaw names this explicitly in its model.' },
   { term: 'Blast radius', rel: 'both', def: 'How much damage a compromised or over-eager agent can do. Both projects shrink it with isolation and least privilege.' },
   { term: 'Defense in depth', rel: 'hermes', def: 'Stacking independent controls so one failure isn’t fatal — Hermes’ seven-layer model.' },
-  { term: 'SecretRef', rel: 'openclaw', def: 'OpenClaw’s indirection for secrets: values are pulled from env / file / exec providers at runtime, never written into config files.' },
+  { term: 'SecretRef', rel: 'openclaw', def: 'OpenClaw’s indirection for secrets: values are pulled from env / file / exec providers at runtime, never written into config files. Static credentials only — OAuth profiles cannot use SecretRef (hard startup error).' },
   { term: 'Secret stripping', rel: 'hermes', def: 'Hermes removes anything matching KEY/TOKEN/SECRET/PASSWORD from a subprocess’ env unless a skill explicitly declares it needs it.' },
   { term: 'Hardline blocklist', rel: 'hermes', def: 'Commands Hermes refuses to run even under --yolo: rm -rf /, fork bombs, disk formatting, raw block-device writes.' },
   { term: 'YOLO mode', rel: 'hermes', def: 'Hermes mode that skips approval prompts — but never the hardline blocklist.' },
@@ -666,6 +669,24 @@ export const CASES = [
     source: 'https://permiso.io/non-human-identity-nhi-security-guide',
   },
   {
+    id: 'vidar-openclaw', icon: '🦠', title: 'The infostealer that swept up an agent’s soul', year: '2026',
+    severity: 'real incident',
+    what: 'A commodity Vidar infostealer variant (infection dated Feb 13, 2026) harvested an OpenClaw user’s openclaw.json gateway tokens, device.json key pairs, and memory files (soul.md, AGENTS.md, MEMORY.md) — the first documented case of an infostealer stealing an AI agent’s credentials and memory. It wasn’t even targeting OpenClaw: a generic keyword sweep for tokens and keys caught a readable state directory that happened to contain the agent’s entire remembered life. Hudson Rock called the haul enough for "a full compromise of the victim’s digital identity."',
+    identity: 'An agent’s plaintext state directory acting as a standing credential-and-memory store, readable by any process running as the user.',
+    stopper: 'Credentials out of world-readable plaintext (OpenClaw has since moved to a per-agent SQLite store + opt-in SecretRef); a dedicated OS user with a 700 state dir; and treating agent memory as sensitive data, not just config.',
+    era: 'Era 6 — Agents', maps: 'SecretRef / state-dir hardening',
+    source: 'https://www.bleepingcomputer.com/news/security/infostealer-malware-found-stealing-openclaw-secrets-for-first-time/',
+  },
+  {
+    id: 'clawhub-toxic-skill', icon: '🧪', title: 'The #1 skill was exfiltrating data', year: '2026',
+    severity: 'real incident',
+    what: 'Cisco’s AI security researchers tested ClawHub’s top-ranked skill (Jan 28, 2026) and found it silently exfiltrating data via curl and performing direct prompt injection — "without user awareness." Snyk’s ToxicSkills study then showed why: publishing to the marketplace required a SKILL.md file and a week-old GitHub account. No code signing, no security review, no sandbox by default.',
+    identity: 'Third-party skill code executing with the agent’s full permissions — an unvetted supply chain feeding directly into a privileged principal.',
+    stopper: 'Install policies with pinned versions and lockfile pinning; actually reading a skill’s code (not just its SKILL.md) before install; opt-in guard scans; treating skills as the operator’s review surface, not the marketplace’s.',
+    era: 'Era 6 — Agents', maps: 'Skill supply chain / install policy',
+    source: 'https://blogs.cisco.com/ai/personal-ai-agents-like-openclaw-are-a-security-nightmare',
+  },
+  {
     id: 'runaway-agent', icon: '🌀', title: 'The agent nobody could stop', year: '2026',
     severity: 'representative pattern',
     what: 'An agent with standing broad credentials begins taking unintended actions. Teams discover they cannot enforce a purpose limit or terminate it cleanly — 63% of orgs report they cannot enforce purpose limits, and 60% cannot kill a misbehaving agent.',
@@ -730,7 +751,9 @@ export const LEARNING_PATHS = [
 
 export const SOURCES = [
   { label: 'Hermes Agent — Security docs', url: 'https://hermes-agent.nousresearch.com/docs/user-guide/security' },
+  { label: 'Hermes Agent — Configuration (backends, approvals)', url: 'https://hermes-agent.nousresearch.com/docs/user-guide/configuration' },
   { label: 'Hermes Agent — SECURITY.md', url: 'https://github.com/NousResearch/hermes-agent/blob/main/SECURITY.md' },
   { label: 'OpenClaw — Gateway Security', url: 'https://docs.openclaw.ai/gateway/security' },
   { label: 'OpenClaw — Sandboxing', url: 'https://docs.openclaw.ai/gateway/sandboxing' },
+  { label: 'OpenClaw — Authentication & credential semantics', url: 'https://docs.openclaw.ai/gateway/authentication' },
 ]

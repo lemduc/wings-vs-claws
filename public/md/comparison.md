@@ -2,7 +2,7 @@
 
 ## Authentication
 
-- Hermes: Gateway checks a strict order: per-platform allow-all → DM-pairing list → platform allowlist → global allowlist → global allow-all → deny. DM pairing issues an 8-char code (1h TTL, rate-limited, 5 fails → 1h lockout, file chmod 0600).
+- Hermes: Gateway checks a strict order: per-platform allow-all → DM-pairing list → platform allowlist → global allowlist → global allow-all → deny. DM pairing issues an 8-char code (1h TTL, rate-limited, 5 fails → 1h lockout, file chmod 0600). Dashboard/remote UI: OAuth (Nous Portal), self-hosted OIDC against your own IdP, or basic auth — fails closed if bound non-loopback with no provider; the old --insecure bypass is a deprecated no-op (June 2026 hardening).
 - OpenClaw: Gateway auth modes: token, password, or trusted-proxy identity. New senders must approve a pairing code (1h TTL, max 3 pending), or use a strict allowlist; "open" requires an explicit "*" opt-in.
 
 ## Authorization model
@@ -12,18 +12,18 @@
 
 ## Tool / action permissions
 
-- Hermes: Dangerous-command approval modes: manual (default, always prompt), smart (LLM risk score → auto allow/deny), off (--yolo). A hardline blocklist (rm -rf /, fork bombs, disk format) is refused even under --yolo.
+- Hermes: Dangerous-command approval modes: manual (default, always prompt), smart (LLM risk score → auto allow/deny), off (--yolo). Approval prompts fail closed — deny — after a 60s timeout. A hardline blocklist (rm -rf /, fork bombs, disk format) is refused even under --yolo.
 - OpenClaw: Three independent permission gates: agent-level tool allow/deny, sandbox-level tool filter, and container network access — all must permit an action. Default "messaging" profile disables automation/runtime/fs groups; tools.elevated bypass is off by default.
 
 ## Secrets & credentials
 
 - Hermes: MCP subprocesses receive only safe vars (PATH, HOME, USER, LANG, TERM, SHELL, TMPDIR, XDG_*); everything with KEY/TOKEN/SECRET/PASSWORD is stripped. Skills declare required_environment_variables / required_credential_files; files mount read-only. Errors redact ghp_…, sk-…, bearer tokens.
-- OpenClaw: Secrets live in ~/.openclaw/credentials/ or behind SecretRef providers (env / file / exec), injected at runtime — never in config files. Untrusted workspace .env files cannot override OPENCLAW_* or provider credentials.
+- OpenClaw: Provider credentials live in a per-agent SQLite store (openclaw-agent.sqlite; legacy JSON is migrated via `openclaw doctor --fix`) or behind SecretRef providers (env / file / exec — static credentials only), injected at runtime. Plaintext still works, and agent-readable files (openclaw.json, .env) stay exposed. Untrusted workspace .env files cannot override OPENCLAW_* or provider credentials.
 
 ## Execution isolation
 
-- Hermes: Hardened containers: --cap-drop ALL, --security-opt no-new-privileges, --pids-limit 256, tmpfs /tmp with nosuid. Backends: local / ssh / docker / singularity / modal. SSRF guard blocks RFC-1918, loopback, link-local, and cloud-metadata addresses.
-- OpenClaw: Sandbox scope: agent / session / shared. Workspace access: none / ro / rw. Host target: sandbox (Docker) / gateway (host) / node (remote). Docker network is disabled by default, so even allowed web tools fail until opened.
+- Hermes: Default backend is local — commands run on the host with no isolation; containers are an opt-in switch. When used, hardened: --cap-drop ALL, --security-opt no-new-privileges, --pids-limit 256, tmpfs /tmp with nosuid (root inside unless docker_run_as_host_user). Backends: local / ssh / docker / singularity / modal / daytona. SSRF guard blocks RFC-1918, loopback, link-local, and cloud-metadata addresses.
+- OpenClaw: Sandboxing is off by default (agents.defaults.sandbox.mode: "off") — an opt-in switch, like Hermes. When enabled: sandbox scope agent / session / shared, workspace access none / ro / rw, host target sandbox (Docker) / gateway (host) / node (remote). Docker network is disabled by default, so even allowed web tools fail until opened.
 
 ## Agent as principal
 

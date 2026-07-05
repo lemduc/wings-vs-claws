@@ -5,7 +5,7 @@
 - **Non-human identity** — An autonomous agent treated as a security principal that takes actions and touches data. OpenClaw names this explicitly in its model.
 - **Blast radius** — How much damage a compromised or over-eager agent can do. Both projects shrink it with isolation and least privilege.
 - **Defense in depth** — Stacking independent controls so one failure isn’t fatal — Hermes’ seven-layer model.
-- **SecretRef** — OpenClaw’s indirection for secrets: values are pulled from env / file / exec providers at runtime, never written into config files.
+- **SecretRef** — OpenClaw’s indirection for secrets: values are pulled from env / file / exec providers at runtime, never written into config files. Static credentials only — OAuth profiles cannot use SecretRef (hard startup error).
 - **Secret stripping** — Hermes removes anything matching KEY/TOKEN/SECRET/PASSWORD from a subprocess’ env unless a skill explicitly declares it needs it.
 - **Hardline blocklist** — Commands Hermes refuses to run even under --yolo: rm -rf /, fork bombs, disk formatting, raw block-device writes.
 - **YOLO mode** — Hermes mode that skips approval prompts — but never the hardline blocklist.
