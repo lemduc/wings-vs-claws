@@ -774,3 +774,14 @@ section { padding: 52px 0; border-top: 1px solid var(--border-soft); }
 .nf-group a { color: var(--purple); text-decoration: none; }
 .nf-group a:hover { text-decoration: underline; }
 .nf-blurb { color: var(--faint); font-size: 12px; }
+
+/* ---- methodology disclosure ---------------------------------------------- */
+.methodology { margin-top: 22px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); }
+.methodology > summary { cursor: pointer; padding: 12px 16px; color: var(--muted); font-size: 13px; }
+.methodology > summary:hover { color: var(--text); }
+.methodology[open] > summary { border-bottom: 1px solid var(--border-soft); color: var(--text); }
+.meth-sec { padding: 4px 16px 0; }
+.meth-sec h3 { font-size: 13px; margin: 12px 0 4px; color: var(--purple); }
+.meth-sec p { margin: 0; color: var(--muted); line-height: 1.65; font-size: 13px; }
+.meth-foot { padding: 12px 16px 16px; margin: 8px 0 0; color: var(--faint); font-size: 12px; line-height: 1.6; }
+.meth-foot a { color: var(--purple); }

@@ -137,6 +137,33 @@ export const IAM_DIMENSIONS = [
   },
 ]
 
+// When the agent claims on this page were last checked against the projects'
+// live primary docs. One constant, so no page can drift out of step with the
+// others. Update it with every fact-check pass (and add a changelog entry).
+export const VERIFIED = { date: '2026-07-06', label: 'July 2026' }
+
+// How to read the ratings. Stated openly, because a comparison that grades two
+// projects owes the reader its standard — especially for the ◐ cells, which are
+// judgment calls rather than facts.
+export const METHODOLOGY = [
+  {
+    h: 'What the marks mean',
+    p: '✓ the control is a first-class, documented feature — named in the project’s own security documentation and on by default or configurable without workarounds. ◐ the control is partially met: possible but opt-in, narrower than the full control, or achieved as a side effect of another mechanism rather than offered directly. ✗ not a focus — the documentation does not claim it.',
+  },
+  {
+    h: 'Where the evidence comes from',
+    p: 'Every cell is read from each project’s own security and configuration documentation, listed in full on the glossary page. Nothing here comes from running the agents, reading their source, or testing the controls. A documented control that is broken in practice would still read as ✓ — this compares what the two projects commit to, not what they deliver.',
+  },
+  {
+    h: 'Why the ◐ cells are the interesting ones',
+    p: 'The ✓ and ✗ cells mostly restate the docs. The ◐ cells are where a judgment was made, and where a maintainer might reasonably disagree — the line between "supported" and "possible if you configure it" is not always crisp. Those calls are open to correction: the contribution guide explains how to challenge one with a documentation link.',
+  },
+  {
+    h: 'The comparison is scoped, and the projects move',
+    p: 'Scope is IAM only — authentication, authorization, secrets, isolation, delegation, audit, and default posture. Neither project is being assessed on capability, performance, or fitness for a task. Both ship quickly, so treat the verification date above as the claim’s expiry: past it, check the primary docs.',
+  },
+]
+
 // IAM control matrix (✓ first-class · ◐ partial/possible · — not a focus)
 export const IAM_MATRIX = [
   { control: 'DM-pairing / allowlist authentication', hermes: 'yes', openclaw: 'yes' },

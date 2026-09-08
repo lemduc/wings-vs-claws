@@ -4,7 +4,7 @@
 // metadata, a quiz answer pointing past the end of its options list.
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { LESSONS, GLOSSARY, LEARNING_PATHS, CASES, STANDARDS } from '../src/data.js'
+import { LESSONS, GLOSSARY, LEARNING_PATHS, CASES, STANDARDS, VERIFIED, METHODOLOGY } from '../src/data.js'
 import { PAGE_META, metaFor, NOT_FOUND_META } from '../src/seo.js'
 import { ALL_ROUTES, SITEMAP_ROUTES } from '../src/seo-build.js'
 import { PAGES } from '../src/nav.js'
@@ -103,5 +103,30 @@ describe('reference content', () => {
   it('gives every case file and standard a description', () => {
     for (const c of CASES) expect(c.title, JSON.stringify(c).slice(0, 60)).toBeTruthy()
     for (const s of STANDARDS) expect(s.what.length, s.name).toBeGreaterThan(20)
+  })
+})
+
+describe('freshness', () => {
+  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December']
+
+  it('has a verification label that matches its date', () => {
+    const [y, m] = VERIFIED.date.split('-')
+    expect(VERIFIED.label).toBe(`${MONTHS[Number(m) - 1]} ${y}`)
+  })
+
+  it('states the verification date in one place only', () => {
+    // Components must read VERIFIED rather than hardcoding a month, which is
+    // how "June 2026" survived on three pages after the July fact-check.
+    const files = ['Sources', 'Standards', 'Journey', 'Compare']
+    for (const f of files) {
+      const src = readFileSync(new URL(`../src/components/${f}.jsx`, import.meta.url), 'utf8')
+      expect(src, `${f}.jsx hardcodes a date`).not.toMatch(/\b(January|February|March|April|May|June|July|August|September|October|November|December) 20\d\d\b/)
+    }
+  })
+
+  it('explains the rating scale', () => {
+    expect(METHODOLOGY.length).toBeGreaterThanOrEqual(3)
+    for (const m of METHODOLOGY) expect(m.p.length, m.h).toBeGreaterThan(100)
   })
 })

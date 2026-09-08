@@ -1,4 +1,4 @@
-import { STANDARDS, STANDARDS_SOURCES } from '../data.js'
+import { STANDARDS, STANDARDS_SOURCES, VERIFIED } from '../data.js'
 
 const TRACK = {
   enterprise: { label: 'enterprise', cls: 'tr-ent' },
@@ -45,7 +45,7 @@ export default function Standards() {
           ))}
         </ul>
         <p className="fine">
-          Status and dates reflect public materials as of June 2026; agent-identity standards
+          Status and dates reflect public materials as of {VERIFIED.label}; agent-identity standards
           are moving fast — treat this as a snapshot, not a spec.
         </p>
       </div>

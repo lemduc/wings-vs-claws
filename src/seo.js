@@ -33,7 +33,7 @@ export const PAGE_META = {
   },
   '/foundations': {
     title: 'IAM Foundations — core concepts, explained',
-    description: 'Short visual lessons on AuthN vs AuthZ, access models, OAuth/OIDC, Zero Trust, non-human identities, and agent delegation.',
+    description: 'Short visual lessons on identity proofing and eKYC, AuthN vs AuthZ, access models, OAuth/OIDC, Zero Trust, non-human identities, and agent delegation.',
   },
   '/journey': {
     title: 'The journey of IAM — pre-AI to agents',

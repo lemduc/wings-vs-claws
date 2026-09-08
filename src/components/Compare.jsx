@@ -1,4 +1,4 @@
-import { IAM_DIMENSIONS, IAM_MATRIX } from '../data.js'
+import { IAM_DIMENSIONS, IAM_MATRIX, METHODOLOGY, VERIFIED } from '../data.js'
 
 function Mark({ value, who }) {
   const map = { yes: ['✓', 'yes'], partial: ['◐', 'partial'], no: ['✗', 'no'] }
@@ -41,7 +41,7 @@ export default function Compare() {
         <div className="section-head">
           <div className="eyebrow">controls</div>
           <h2><span className="fn">capabilities</span><span className="pn">[]</span></h2>
-          <p>✓ first-class · ◐ partial / possible · ✗ not a focus — as documented (June 2026).</p>
+          <p>✓ first-class · ◐ partial / possible · ✗ not a focus — as documented, verified {VERIFIED.label}.</p>
         </div>
         <table className="matrix">
           <thead>
@@ -61,6 +61,23 @@ export default function Compare() {
             ))}
           </tbody>
         </table>
+
+        <details className="methodology">
+          <summary>How these ratings were made</summary>
+          {METHODOLOGY.map((m) => (
+            <div className="meth-sec" key={m.h}>
+              <h3>{m.h}</h3>
+              <p>{m.p}</p>
+            </div>
+          ))}
+          <p className="meth-foot">
+            Claims last checked against the projects’ live documentation in {VERIFIED.label}.
+            Spotted something out of date?{' '}
+            <a href="https://github.com/lemduc/wings-vs-claws/issues/new?template=content_suggestion.md" target="_blank" rel="noreferrer">
+              open a content issue ↗
+            </a>
+          </p>
+        </details>
       </section>
     </>
   )

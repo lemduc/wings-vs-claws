@@ -1,4 +1,4 @@
-import { SOURCES } from '../data.js'
+import { SOURCES, VERIFIED } from '../data.js'
 import { SITE } from '../seo.js'
 
 export default function Sources() {
@@ -15,7 +15,7 @@ export default function Sources() {
       <p className="fine">
         Wings/Claws :: iam is an independent, unofficial comparison built for demonstration —
         not affiliated with Nous Research or the OpenClaw project. IAM claims are drawn from each
-        project's published security documentation (retrieved June 2026); the simulator presents
+        project's published security documentation (verified {VERIFIED.label}); the simulator presents
         illustrative traces of documented mechanisms, not live runs or transcripts. Security
         posture and defaults change quickly — verify against the official docs before relying on
         any control here.
