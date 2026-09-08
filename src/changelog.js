@@ -4,6 +4,7 @@ export const CHANGES = [
     version: '0.5', date: '2026-09-08', title: 'Fact-check, identity proofing, and a hardening pass',
     items: [
       'Hermes now documents an eight-layer model, not seven — file write safety (protected-path denylist plus an optional write root) joins as layer 3, and the diagrams, the game and the threat mapping follow it.',
+      'OpenClaw rated ✓ on SSRF / egress protection (was ◐): the SSRF policy is strict by default across the browser and web-fetch tools, independent of whether the sandbox is enabled.',
       'Corrections: the approval timeout is 300s, not 60s, and smart (LLM-scored) is the default approval mode, not manual. OpenClaw sandboxes are hardened by default when enabled (capDrop ALL, no-new-privileges, readOnlyRoot, non-root user, network "none").',
       'New foundation lesson: identity proofing & eKYC — assurance levels (NIST SP 800-63A), document/chip verification, and why injection attacks slip past liveness detection.',
       'Standards radar adds NIST SP 800-63A and ISO/IEC 30107-3; five new glossary terms.',

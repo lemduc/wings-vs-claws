@@ -97,7 +97,7 @@ export const IAM_DIMENSIONS = [
     hermes:
       'Default backend is local — commands run on the host with no isolation; containers are an opt-in switch. When used, hardened: --cap-drop ALL, --security-opt no-new-privileges, --pids-limit 256, tmpfs /tmp with nosuid (root inside unless docker_run_as_host_user). Backends: local / ssh / docker / singularity / modal / daytona / vercel_sandbox. HERMES_WRITE_SAFE_ROOT can additionally confine writes to a directory prefix (set to /opt/data in the official image). SSRF guard blocks RFC-1918, loopback, link-local, CGNAT (100.64.0.0/10) and cloud-metadata addresses; allow_private_urls defaults false.',
     openclaw:
-      'Sandboxing is off by default — an opt-in switch, like Hermes. When enabled the Docker backend is hardened out of the box: capDrop ALL, no-new-privileges, readOnlyRoot, a non-root sandbox user, and network "none", so even allowed web tools fail until egress is opened. Scope is agent (default) / session / shared; workspace access none (default) / ro / rw. Backends: docker / podman / ssh / OpenShell managed remote sandboxes.',
+      'Sandboxing is off by default — an opt-in switch, like Hermes. When enabled the Docker backend is hardened out of the box: capDrop ALL, no-new-privileges, readOnlyRoot, a non-root sandbox user, and network "none", so even allowed web tools fail until egress is opened. Scope is agent (default) / session / shared; workspace access none (default) / ro / rw. Backends: docker / podman / ssh / OpenShell managed remote sandboxes. Independent of the sandbox, an SSRF policy is strict by default across the browser and web-fetch tools: private and internal destinations are refused unless dangerouslyAllowPrivateNetwork is set, requests are intercepted before any HTTP bytes leave, and the deny list is evaluated ahead of allow rules.',
   },
   {
     id: 'principal',
@@ -172,7 +172,7 @@ export const IAM_MATRIX = [
   { control: 'Env-var secret stripping from subprocess', hermes: 'yes', openclaw: 'partial' },
   { control: 'SecretRef / vault runtime injection', hermes: 'partial', openclaw: 'yes' },
   { control: 'Hardened container flags (cap-drop, no-new-privs)', hermes: 'yes', openclaw: 'partial' },
-  { control: 'SSRF / egress network protection', hermes: 'yes', openclaw: 'partial' },
+  { control: 'SSRF / egress network protection', hermes: 'yes', openclaw: 'yes' },
   { control: 'Per-subagent visibility scoping', hermes: 'partial', openclaw: 'yes' },
   { control: 'Built-in security-audit command', hermes: 'partial', openclaw: 'yes' },
   { control: 'Cross-session / context isolation', hermes: 'yes', openclaw: 'yes' },
@@ -327,7 +327,7 @@ export const GLOSSARY = [
   { term: 'Operator vs non-operator', rel: 'openclaw', def: 'OpenClaw’s role split: the operator holds privileged control of the gateway; everyone else is gated to a smaller surface.' },
   { term: 'Sandbox scope', rel: 'openclaw', def: 'OpenClaw bounds a sandbox to agent / session / shared, limiting what a single tool run can reach.' },
   { term: 'Container as boundary', rel: 'hermes', def: 'When Hermes runs in docker / modal, the hardened container is the security boundary, so per-command checks defer to it.' },
-  { term: 'SSRF guard', rel: 'hermes', def: 'Hermes blocks URL tools from reaching private, loopback, link-local, and cloud-metadata addresses to stop server-side request forgery.' },
+  { term: 'SSRF guard', rel: 'both', def: 'Blocking URL tools from reaching private, loopback, link-local, and cloud-metadata addresses, to stop server-side request forgery. Hermes ships one with allow_private_urls off by default; OpenClaw applies a strict-by-default SSRF policy to its browser and web-fetch tools, refusing private networks unless explicitly opted out.' },
   { term: 'Cross-session isolation', rel: 'both', def: 'Sessions can’t read each other’s data or state, so one user or task can’t leak into another.' },
   { term: 'Subagent visibility', rel: 'openclaw', def: 'OpenClaw scopes which sessions a child agent can see: self / tree / agent / all.' },
   { term: 'Heartbeat', rel: 'openclaw', def: 'OpenClaw’s scheduled polling loop that lets the agent act proactively rather than only on request.' },
@@ -376,7 +376,7 @@ export const PLAYGROUND = [
       { v: 'off', label: 'off by default', risk: 0 },
       { v: 'open', label: 'open egress', risk: 15 },
     ],
-    note: 'Open egress enables exfiltration and SSRF. OpenClaw disables container network by default; Hermes adds an SSRF guard.',
+    note: 'Open egress enables exfiltration and SSRF. Both refuse private and internal destinations by default; OpenClaw also disables the sandbox container network outright.',
   },
   {
     id: 'elevated', label: 'sandbox_bypass', default: 'off',

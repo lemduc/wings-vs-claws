@@ -18,7 +18,7 @@
 - **Operator vs non-operator** — OpenClaw’s role split: the operator holds privileged control of the gateway; everyone else is gated to a smaller surface.
 - **Sandbox scope** — OpenClaw bounds a sandbox to agent / session / shared, limiting what a single tool run can reach.
 - **Container as boundary** — When Hermes runs in docker / modal, the hardened container is the security boundary, so per-command checks defer to it.
-- **SSRF guard** — Hermes blocks URL tools from reaching private, loopback, link-local, and cloud-metadata addresses to stop server-side request forgery.
+- **SSRF guard** — Blocking URL tools from reaching private, loopback, link-local, and cloud-metadata addresses, to stop server-side request forgery. Hermes ships one with allow_private_urls off by default; OpenClaw applies a strict-by-default SSRF policy to its browser and web-fetch tools, refusing private networks unless explicitly opted out.
 - **Cross-session isolation** — Sessions can’t read each other’s data or state, so one user or task can’t leak into another.
 - **Subagent visibility** — OpenClaw scopes which sessions a child agent can see: self / tree / agent / all.
 - **Heartbeat** — OpenClaw’s scheduled polling loop that lets the agent act proactively rather than only on request.

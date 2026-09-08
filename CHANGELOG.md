@@ -22,6 +22,12 @@ guide to IAM for the AI-agent era.
   and cloud-metadata ranges in the SSRF guard, `approvals.deny` glob rules
   evaluated ahead of YOLO, and a wider env-strip list (`CREDENTIAL`, `PASSWD`,
   `AUTH`) plus `LC_ALL` in the MCP passthrough.
+- **OpenClaw's SSRF / egress rating moves from ◐ to ✓.** Its SSRF policy is
+  strict by default across the browser and web-fetch tools, refusing private
+  and internal destinations unless explicitly opted out, and it applies
+  whether or not the sandbox is enabled — so it is not the opt-in case that ◐
+  describes. The comparison cells now carry that fact, since the mark has to
+  be traceable to sourced text on the page.
 - OpenClaw: sandboxes are hardened by default once enabled — `capDrop: ["ALL"]`,
   `no-new-privileges`, `readOnlyRoot`, a non-root user, and `network: "none"`.
   Backends now include SSH and OpenShell managed remote sandboxes. OAuth tokens
