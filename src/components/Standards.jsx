@@ -12,7 +12,7 @@ export default function Standards() {
       <section id="standards">
         <div className="section-head">
           <div className="eyebrow">reference · the moving frontier</div>
-          <h2><span className="fn">standards</span><span className="pn">.radar</span></h2>
+          <h1><span className="fn">standards</span><span className="pn">.radar</span></h1>
           <p>
             Agentic IAM is being assembled from two directions: the <b className="tok-blue">enterprise</b> stack
             (OAuth, OIDC, SPIFFE) extended downward, and new <b className="tok-orange">agentic</b> work

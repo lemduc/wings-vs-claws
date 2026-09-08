@@ -86,7 +86,7 @@ export default function Simulator() {
       <div className="wrap">
         <div className="section-head">
           <div className="eyebrow">interactive</div>
-          <h2><span className="fn">traceAccess</span><span className="pn">(scenario)</span></h2>
+          <h1><span className="fn">traceAccess</span><span className="pn">(scenario)</span></h1>
           <p>
             Pick an access scenario — or describe your own — and watch each agent's
             documented IAM controls gate it, layer by layer.

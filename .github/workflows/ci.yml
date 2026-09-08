@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Content integrity tests
+        run: npm test
+
+      - name: Build (includes sitemap, feed, llms.txt, routes, prerender)
+        run: npm run build
+
+      - name: Fail if generated files are stale
+        run: |
+          if ! git diff --quiet -- public generated; then
+            echo "::error::Generated files are out of date. Run 'npm run build' and commit the result."
+            git --no-pager diff --stat -- public generated
+            exit 1
+          fi
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=moderate

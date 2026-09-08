@@ -259,8 +259,11 @@ section { padding: 52px 0; border-top: 1px solid var(--border-soft); }
 .section-head { margin-bottom: 26px; }
 .section-head .eyebrow { color: var(--faint); font-size: 12px; margin-bottom: 6px; }
 .section-head .eyebrow::before { content: '// '; }
+.section-head h1,
 .section-head h2 { font-size: clamp(22px, 3.4vw, 30px); margin: 0 0 6px; letter-spacing: -0.5px; }
+.section-head h1 .fn,
 .section-head h2 .fn { color: var(--purple); }
+.section-head h1 .pn,
 .section-head h2 .pn { color: var(--faint); }
 .section-head p { color: var(--muted); margin: 0; max-width: 700px; font-size: 14px; }
 
@@ -763,3 +766,11 @@ section { padding: 52px 0; border-top: 1px solid var(--border-soft); }
   .matrix td.mark { display: inline-block; width: 50%; text-align: left; }
   .matrix td.mark::before { content: attr(data-who) ': '; color: var(--faint); font-weight: 400; }
 }
+
+/* ---- 404 ---------------------------------------------------------------- */
+.nf-groups { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top: 22px; }
+.nf-group ul { list-style: none; margin: 8px 0 0; padding: 0; }
+.nf-group li { padding: 3px 0; line-height: 1.5; }
+.nf-group a { color: var(--purple); text-decoration: none; }
+.nf-group a:hover { text-decoration: underline; }
+.nf-blurb { color: var(--faint); font-size: 12px; }

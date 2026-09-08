@@ -279,6 +279,11 @@ export const VERDICT = {
 // IAM glossary — concise, sourced definitions of the jargon used on the site.
 // rel: 'both' | 'hermes' | 'openclaw' (whose mechanism the term leans on).
 export const GLOSSARY = [
+  { term: 'Identity proofing', rel: 'both', def: 'Binding a real-world person to a new account at enrollment, before any credential exists. NIST SP 800-63A grades the strength as IAL1–IAL3.' },
+  { term: 'eKYC', rel: 'both', def: 'Remote identity proofing: verify the ID document is genuine, that it belongs to a real person, and that the person presenting it is live and present.' },
+  { term: 'Presentation attack', rel: 'both', def: 'Spoofing shown to the sensor — a printed photo, screen replay, or mask. What liveness detection (ISO/IEC 30107-3) is designed to catch.' },
+  { term: 'Injection attack', rel: 'both', def: 'Bypassing the camera and feeding a synthetic video stream into the app or driver. Liveness scores do not see it, because the frames never came from a sensor at all.' },
+  { term: 'Passive authentication', rel: 'both', def: 'Verifying the issuing authority’s signature over an ID chip’s data groups (ICAO Doc 9303) — far stronger evidence than OCR of the printed page.' },
   { term: 'Deny-by-default', rel: 'both', def: 'Access is refused unless a rule explicitly allows it. Hermes’ gateway falls through to deny; OpenClaw requires an allowlist or approved pairing.' },
   { term: 'DM pairing code', rel: 'both', def: 'A short, expiring code an unknown sender must get approved before they can drive the agent. Hermes: 8 chars, 1h TTL, rate-limited, lockout after 5 fails.' },
   { term: 'Non-human identity', rel: 'openclaw', def: 'An autonomous agent treated as a security principal that takes actions and touches data. OpenClaw names this explicitly in its model.' },
@@ -435,6 +440,34 @@ export const JOURNEY_SOURCES = [
 // ── Foundations: short, visual lessons on core IAM primitives ──────────────
 // Each lesson: concept → diagram (flow) → "how it changes for agents" → quiz.
 export const LESSONS = [
+  {
+    slug: 'identity-proofing', icon: '🛂', level: 'Foundation',
+    title: 'Identity proofing & eKYC',
+    tldr: 'Before a system can authenticate you, someone has to decide the account is really yours. Identity proofing is that first, hardest step — and the one attackers now target with synthetic media.',
+    sections: [
+      { h: 'Proofing is not authentication', p: 'Authentication checks a credential you already hold. Identity proofing (enrollment) is what happens before that credential exists: binding a real-world person to a new account. Get it wrong and every later control is perfectly enforcing access for the wrong human. NIST SP 800-63A separates this as its own assurance dimension — IAL1 (self-asserted), IAL2 (evidence checked remotely or in person), IAL3 (in-person, verified by a trained operator).' },
+      { h: 'What eKYC actually checks', p: 'Remote proofing ("eKYC" in finance and telecom) usually chains three checks: the document is genuine, the document belongs to a real person, and the person presenting it is alive and present. Modern ID documents carry a signed chip — passive authentication under ICAO Doc 9303 verifies the issuer’s signature over the data groups, which is far stronger than reading printed text with OCR.' },
+      { h: 'Presentation vs injection attacks', p: 'Liveness detection under ISO/IEC 30107-3 is built to catch presentation attacks — a printed photo, a screen replay, a silicone mask held up to the camera. Injection attacks skip the camera entirely and feed a synthetic video stream straight into the app or driver. Generative face-swapping made these cheap, and a PAD score alone does not see them: the frames look perfectly live because, as far as the sensor pipeline knows, they are.' },
+      { h: 'Defending the capture path', p: 'Because the weak point is the path rather than the picture, the controls are path controls: attest the app and device, verify the frames came from a real sensor, bind the session to a signed challenge the attacker cannot pre-render, check the chip rather than the printed face, and keep a human review lane for the cases the score cannot settle.' },
+    ],
+    flow: [
+      { label: 'Evidence', sub: 'document + chip' },
+      { label: 'Verify', sub: 'genuine & unaltered' },
+      { label: 'Bind', sub: 'liveness → this person' },
+      { label: 'Enroll', sub: 'credential issued' },
+    ],
+    agentTwist: 'Agents inherit whatever the proofing step got right or wrong — an agent acting on behalf of a fraudulently enrolled account is a perfectly authorized path to someone else’s money. The reverse problem is newer: agents are also the ones submitting selfies and documents now, so "is a human present?" stops being a safe proxy for "is this the right human?". Expect proofing evidence to travel with the delegation chain, so a resource can ask how strongly the underlying human was ever verified.',
+    related: [
+      { to: '/learn/authn-vs-authz', label: 'AuthN vs AuthZ' },
+      { to: '/learn/mfa', label: 'MFA & phishing resistance' },
+      { to: '/standards', label: 'Standards radar' },
+    ],
+    quiz: [
+      { q: 'Identity proofing happens…', options: ['Every time you log in', 'Once, when the account is created', 'Only when you reset a password'], answer: 1, explain: 'Proofing binds a real person to an account at enrollment; authentication then checks the credential that enrollment issued.' },
+      { q: 'An attacker feeds a generated video straight into the app, bypassing the camera. This is…', options: ['A presentation attack', 'An injection attack'], answer: 1, explain: 'Presentation attacks are shown to the sensor; injection attacks replace the sensor feed. Liveness scoring is aimed at the former.' },
+      { q: 'Reading an ID document’s signed chip is stronger than OCR of the printed page because…', options: ['It is faster', 'The issuer’s signature can be verified', 'It works offline'], answer: 1, explain: 'ICAO 9303 passive authentication verifies the issuing authority’s signature over the data — printed text can simply be forged.' },
+    ],
+  },
   {
     slug: 'authn-vs-authz', icon: '🪪', level: 'Foundation',
     title: 'Authentication vs Authorization',
@@ -646,6 +679,8 @@ export const STANDARDS = [
   { name: 'RFC 8707 — Resource Indicators', status: 'RFC (2020)', track: 'enterprise', what: 'Bind a token to a specific audience/resource, limiting where it can be replayed.' },
   { name: 'OAuth on-behalf-of user (AI agents)', status: 'IETF draft · 2025', track: 'agentic', what: 'Adds act / requested_actor / actor_token so a token carries the user → agent delegation chain.' },
   { name: 'MCP Authorization', status: 'spec · 2025-11', track: 'agentic', what: 'An OAuth 2.1 profile for the Model Context Protocol — how agent clients get scoped access to tools and servers.' },
+  { name: 'NIST SP 800-63A — Identity Proofing', status: 'established', track: 'enterprise', what: 'Assurance levels (IAL1-3) for how strongly a real person was bound to an account at enrollment.' },
+  { name: 'ISO/IEC 30107-3 — Presentation Attack Detection', status: 'established', track: 'enterprise', what: 'How liveness/anti-spoof systems are tested — and why injection attacks fall outside what it measures.' },
   { name: 'SPIFFE / SPIRE', status: 'CNCF', track: 'enterprise', what: 'Verifiable, short-lived workload identity (SVIDs) without stored secrets.' },
   { name: 'NIST AI Agent Standards Initiative', status: 'launched · Feb 2026', track: 'agentic', what: 'Early US-government work toward governing autonomous-agent identity and action.' },
 ]
@@ -655,6 +690,8 @@ export const STANDARDS_SOURCES = [
   { label: 'Model Context Protocol — Authorization', url: 'https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization' },
   { label: 'RFC 8693 — OAuth 2.0 Token Exchange', url: 'https://www.rfc-editor.org/rfc/rfc8693' },
   { label: 'SPIFFE — Secure Production Identity Framework', url: 'https://spiffe.io/' },
+  { label: 'NIST SP 800-63A — Identity Proofing & Enrollment', url: 'https://pages.nist.gov/800-63-3/sp800-63a.html' },
+  { label: 'ICAO Doc 9303 — Machine Readable Travel Documents', url: 'https://www.icao.int/publications/pages/publication.aspx?docnum=9303' },
 ]
 
 // ── Case files: learn from real (and representative) failures ───────────────
@@ -720,6 +757,7 @@ export const LEARNING_PATHS = [
   {
     id: 'new-iam', icon: '🌱', title: 'New to IAM', who: 'Start from zero — what identity even means.',
     steps: [
+      { to: '/learn/identity-proofing', label: 'Identity proofing & eKYC' },
       { to: '/learn/authn-vs-authz', label: 'AuthN vs AuthZ' },
       { to: '/learn/access-models', label: 'Access models' },
       { to: '/learn/tokens-oauth', label: 'Tokens, OAuth & OIDC' },

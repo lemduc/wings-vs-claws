@@ -1,5 +1,10 @@
 # IAM Glossary (agentic identity)
 
+- **Identity proofing** — Binding a real-world person to a new account at enrollment, before any credential exists. NIST SP 800-63A grades the strength as IAL1–IAL3.
+- **eKYC** — Remote identity proofing: verify the ID document is genuine, that it belongs to a real person, and that the person presenting it is live and present.
+- **Presentation attack** — Spoofing shown to the sensor — a printed photo, screen replay, or mask. What liveness detection (ISO/IEC 30107-3) is designed to catch.
+- **Injection attack** — Bypassing the camera and feeding a synthetic video stream into the app or driver. Liveness scores do not see it, because the frames never came from a sensor at all.
+- **Passive authentication** — Verifying the issuing authority’s signature over an ID chip’s data groups (ICAO Doc 9303) — far stronger evidence than OCR of the printed page.
 - **Deny-by-default** — Access is refused unless a rule explicitly allows it. Hermes’ gateway falls through to deny; OpenClaw requires an allowlist or approved pairing.
 - **DM pairing code** — A short, expiring code an unknown sender must get approved before they can drive the agent. Hermes: 8 chars, 1h TTL, rate-limited, lockout after 5 fails.
 - **Non-human identity** — An autonomous agent treated as a security principal that takes actions and touches data. OpenClaw names this explicitly in its model.

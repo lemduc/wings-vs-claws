@@ -117,7 +117,7 @@ export default function Architecture() {
     <section id="architecture">
       <div className="section-head">
         <div className="eyebrow">the iam model, visualized</div>
-        <h2><span className="fn">enforcement</span><span className="pn">.topology</span></h2>
+        <h1><span className="fn">enforcement</span><span className="pn">.topology</span></h1>
         <p>
           Hermes stacks seven independent defensive layers — a request must survive all of
           them. OpenClaw chains permission gates that each must say "allow." Two different

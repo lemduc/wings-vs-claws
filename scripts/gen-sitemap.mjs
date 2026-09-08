@@ -1,7 +1,8 @@
 // Generates public/sitemap.xml from the route list in src/seo.js.
 // Runs automatically on `npm run build` via the prebuild script.
 import { writeFileSync } from 'node:fs'
-import { SITE, SITEMAP_ROUTES } from '../src/seo.js'
+import { SITE } from '../src/seo.js'
+import { SITEMAP_ROUTES } from '../src/seo-build.js'
 
 const urls = SITEMAP_ROUTES
   .map((r) => `  <url><loc>${SITE.baseUrl}${r === '/' ? '/' : r}</loc></url>`)

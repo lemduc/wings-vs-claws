@@ -1,6 +1,7 @@
 // Cloudflare Worker: serves the static assets with security headers, and hosts
 // a tiny DEMO authorization server for the live PKCE lab (/api/oauth/*).
 // SPA fallback + prerendered per-route HTML are handled by the assets binding.
+import { ROUTES } from './generated/routes.js'
 const CSP_BASE =
   "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; " +
   "script-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self'; " +
@@ -89,6 +90,16 @@ async function handleOAuth(request, path) {
   return json({ error: 'invalid_request' }, 404)
 }
 
+// A request is an unknown route when the assets binding fell back to the SPA
+// shell (HTML 200) for a path that is not in the generated route allowlist.
+// Real files — /assets/*, /og.svg, /md/*.md — never reach this branch because
+// they resolve to their own non-HTML response.
+function isUnknownRoute(path, res) {
+  if (res.status !== 200) return false
+  if (!(res.headers.get('content-type') || '').includes('text/html')) return false
+  return !ROUTES.has(path) && !ROUTES.has(path.replace(/\/$/, ''))
+}
+
 // ---------- main fetch -------------------------------------------------------
 export default {
   async fetch(request, env) {
@@ -103,12 +114,19 @@ export default {
     const res = await env.ASSETS.fetch(request)
     const headers = new Headers(res.headers)
     headers.set('X-Content-Type-Options', 'nosniff')
+    headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload')
     headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
     headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), interest-cohort=()')
     // The /embed/* widgets are meant to be framed anywhere; everything else is same-origin only.
     const frameAncestors = path.startsWith('/embed') ? 'frame-ancestors *' : "frame-ancestors 'self'"
     headers.set('Content-Security-Policy', CSP_BASE + frameAncestors)
 
-    return new Response(res.body, { status: res.status, statusText: res.statusText, headers })
+    // The assets binding answers unknown paths with the SPA shell and a 200.
+    // For a path that is neither a known route nor a real file, that is a soft
+    // 404: search engines index infinite duplicates of the site. Serve the same
+    // shell (React renders the 404 page) but with an honest status.
+    const status = isUnknownRoute(path, res) ? 404 : res.status
+
+    return new Response(res.body, { status, statusText: res.statusText, headers })
   },
 }

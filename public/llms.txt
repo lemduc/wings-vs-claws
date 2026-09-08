@@ -9,6 +9,7 @@ factual claims trace to primary sources.
 
 ## Lessons
 
+- [Identity proofing & eKYC](https://iam.vjsonline.org/md/identity-proofing.md): Before a system can authenticate you, someone has to decide the account is really yours. Identity proofing is that first, hardest step — and the one attackers now target with synthetic media.
 - [Authentication vs Authorization](https://iam.vjsonline.org/md/authn-vs-authz.md): Authentication proves who you are. Authorization decides what you may do. Agents add a third question: who are you acting for?
 - [Access models: ACL, RBAC, ABAC](https://iam.vjsonline.org/md/access-models.md): Three ways to express "who can do what" — lists, roles, and policies — trading simplicity for flexibility.
 - [Federation & Single Sign-On](https://iam.vjsonline.org/md/federation-sso.md): Federation lets an identity from one place sign in somewhere else. SSO means one login works across many apps.

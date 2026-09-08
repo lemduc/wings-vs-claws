@@ -9,7 +9,7 @@ export default function QuizPage() {
     <section id="quiz">
       <div className="section-head">
         <div className="eyebrow">practice · test yourself</div>
-        <h2><span className="fn">quiz</span><span className="pn">() // {QUESTIONS.length} questions</span></h2>
+        <h1><span className="fn">quiz</span><span className="pn">() // {QUESTIONS.length} questions</span></h1>
         <p>One question from each foundation lesson. Score ≥ 67% to pass — your best is saved.</p>
       </div>
       <Quiz questions={QUESTIONS} id="cumulative" title="IAM foundations — final check" />

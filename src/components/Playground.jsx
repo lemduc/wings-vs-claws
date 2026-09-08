@@ -47,7 +47,7 @@ export default function Playground() {
       <div className="wrap">
         <div className="section-head">
           <div className="eyebrow">interactive</div>
-          <h2><span className="fn">configPosture</span><span className="pn">(agent.toml)</span></h2>
+          <h1><span className="fn">configPosture</span><span className="pn">(agent.toml)</span></h1>
           <p>
             Flip the security settings and watch the IAM posture move. Every weight reflects a
             real control from the two projects’ docs.

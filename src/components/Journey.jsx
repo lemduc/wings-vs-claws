@@ -48,7 +48,7 @@ export default function Journey() {
       <section id="journey">
         <div className="section-head">
           <div className="eyebrow">the road to agentic identity</div>
-          <h2><span className="fn">git log</span><span className="pn"> --oneline identity</span></h2>
+          <h1><span className="fn">git log</span><span className="pn"> --oneline identity</span></h1>
           <p>
             Every era of IAM solved the last one’s problem — and created a new kind of identity to
             govern. AI agents are just the newest, and unruliest, commit on that branch.

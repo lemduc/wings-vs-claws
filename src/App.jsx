@@ -24,6 +24,7 @@ const OAuthFlow = lazy(() => import('./components/OAuthFlow.jsx'))
 const Changelog = lazy(() => import('./components/Changelog.jsx'))
 const Embed = lazy(() => import('./components/Embed.jsx'))
 const About = lazy(() => import('./components/About.jsx'))
+const NotFound = lazy(() => import('./components/NotFound.jsx'))
 
 function Overview() {
   return (<><Hero /><Verdict /><About /></>)
@@ -63,7 +64,8 @@ export default function App() {
           <Route path="/playground" element={<Playground />} />
           <Route path="/game" element={<Game />} />
           <Route path="/glossary" element={<GlossaryPage />} />
-          <Route path="*" element={<Overview />} />
+          {/* A real 404 — not the homepage. The Worker sends a 404 status with it. */}
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </BrowserRouter>

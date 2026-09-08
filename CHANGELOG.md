@@ -3,6 +3,50 @@
 All notable changes to Wings vs Claws. The site is an interactive, source-grounded
 guide to IAM for the AI-agent era.
 
+## v0.5 — September 2026
+
+### Identity proofing, and a hardening pass
+
+**Content**
+
+- New foundation lesson **Identity proofing & eKYC**, placed first in the
+  foundations sequence: proofing vs authentication, identity assurance levels
+  (NIST SP 800-63A IAL1–3), what remote eKYC actually checks, ICAO 9303 passive
+  authentication, and the presentation-vs-injection attack distinction that
+  generative face-swapping made urgent.
+- Standards radar gains NIST SP 800-63A and ISO/IEC 30107-3; the glossary gains
+  identity proofing, eKYC, presentation attack, injection attack, and passive
+  authentication.
+
+**Correctness**
+
+- Unknown URLs used to render the homepage with a 200 status — every typo was a
+  soft 404 that duplicated the site. There is now a real 404 page, the Worker
+  answers with a 404 status, and the page is marked `noindex` with no canonical.
+- Every route renders an `<h1>`. Only the homepage had one; the prerendered HTML
+  did include one, so what crawlers read disagreed with what the app rendered.
+- The footer's "last updated" stamp and version now derive from the changelog
+  instead of being hand-maintained (they had drifted a release behind).
+- Defense-in-depth game: deferred transitions are tracked and cancelled, so
+  timers no longer outlive the component or the round that scheduled them.
+
+**Security**
+
+- `react-router-dom` 6.30 → 7.18, clearing the open-redirect advisory
+  (GHSA-wrjc-x8rr-h8h6). `npm audit --omit=dev` is now clean.
+- `Strict-Transport-Security` added alongside the existing security headers.
+
+**Engineering**
+
+- CI on every PR: lint, content-integrity tests, build, a staleness check on
+  generated files, and a production dependency audit. There was no CI before.
+- ESLint (flat config) and Vitest added; 11 tests assert that lesson slugs are
+  unique, internal links resolve, quiz answers index into their options, every
+  sitemap route has real metadata, and the Worker's route allowlist is current.
+- `data.js` no longer ships in the entry bundle — the ⌘K palette and the SEO
+  head manager load it on demand. Entry chunk 231 kB → 202 kB (78 → 67 kB gzip),
+  including the router upgrade and the new lesson.
+
 ## v0.4 — July 2026
 
 ### Fact-check refresh

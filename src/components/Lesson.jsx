@@ -40,7 +40,7 @@ export default function Lesson() {
         <div className="eyebrow">
           <Link to="/foundations" className="crumb">foundations</Link> / {lesson.level.toLowerCase()}
         </div>
-        <h2>{lesson.icon} {lesson.title}</h2>
+        <h1>{lesson.icon} {lesson.title}</h1>
         <p className="lesson-tldr">{lesson.tldr}</p>
       </div>
 

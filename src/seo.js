@@ -1,6 +1,16 @@
 // Per-route SEO metadata. Keep titles unique and descriptive — this is what
 // search engines and social cards show. baseUrl is overridable for a custom domain.
-import { LESSONS } from './data.js'
+//
+// This module is imported by the browser bundle, so it deliberately does NOT
+// import data.js — lesson metadata is looked up lazily (see metaFor) and the
+// build-time route list lives in seo-build.js.
+import { CHANGES } from './changelog.js'
+
+// Freshness comes from the changelog so there is one source of truth.
+const LATEST = CHANGES[0]
+const [y, m] = LATEST.date.split('-')
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December']
 
 export const SITE = {
   name: 'Wings vs Claws',
@@ -8,11 +18,11 @@ export const SITE = {
   defaultDescription:
     'Learn IAM — from directories to agents. An interactive, source-grounded guide to identity & access management for the AI-agent era.',
   ogImage: 'https://iam.vjsonline.org/og.svg',
-  lastUpdated: 'June 2026',
-  version: '0.3',
+  lastUpdated: `${MONTHS[Number(m) - 1]} ${y}`,
+  version: LATEST.version,
 }
 
-const PAGE_META = {
+export const PAGE_META = {
   '/': {
     title: 'Hermes Agent vs OpenClaw — IAM, side by side',
     description: 'A source-grounded comparison of how two open-source AI agents handle identity & access management: authN, authZ, secrets, isolation, and delegation.',
@@ -79,18 +89,21 @@ const PAGE_META = {
   },
 }
 
-export function metaFor(pathname) {
+// Metadata for a route. Lesson pages need the LESSONS array; callers that can
+// supply it (the prerenderer, and Seo.jsx after a lazy import) pass it in.
+export function metaFor(pathname, lessons) {
   if (PAGE_META[pathname]) return PAGE_META[pathname]
-  if (pathname.startsWith('/learn/')) {
-    const slug = pathname.replace('/learn/', '')
-    const lesson = LESSONS.find((l) => l.slug === slug)
+  if (pathname.startsWith('/learn/') && lessons) {
+    const slug = pathname.slice('/learn/'.length)
+    const lesson = lessons.find((l) => l.slug === slug)
     if (lesson) return { title: `${lesson.title} — IAM lesson`, description: lesson.tldr }
   }
-  return { title: 'Learn IAM, from directories to agents', description: SITE.defaultDescription }
+  return NOT_FOUND_META
 }
 
-// All routes for the static sitemap.
-export const SITEMAP_ROUTES = [
-  ...Object.keys(PAGE_META),
-  ...LESSONS.map((l) => `/learn/${l.slug}`),
-]
+// Served for anything that isn't a known route. Marked noindex by Seo.jsx.
+export const NOT_FOUND_META = {
+  title: 'Page not found',
+  description: 'That page does not exist. Browse the IAM lessons, labs, and reference pages instead.',
+  noindex: true,
+}

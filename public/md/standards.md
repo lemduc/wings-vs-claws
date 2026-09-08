@@ -6,6 +6,8 @@
 - **RFC 8707 — Resource Indicators** (RFC (2020); track: enterprise) — Bind a token to a specific audience/resource, limiting where it can be replayed.
 - **OAuth on-behalf-of user (AI agents)** (IETF draft · 2025; track: agentic) — Adds act / requested_actor / actor_token so a token carries the user → agent delegation chain.
 - **MCP Authorization** (spec · 2025-11; track: agentic) — An OAuth 2.1 profile for the Model Context Protocol — how agent clients get scoped access to tools and servers.
+- **NIST SP 800-63A — Identity Proofing** (established; track: enterprise) — Assurance levels (IAL1-3) for how strongly a real person was bound to an account at enrollment.
+- **ISO/IEC 30107-3 — Presentation Attack Detection** (established; track: enterprise) — How liveness/anti-spoof systems are tested — and why injection attacks fall outside what it measures.
 - **SPIFFE / SPIRE** (CNCF; track: enterprise) — Verifiable, short-lived workload identity (SVIDs) without stored secrets.
 - **NIST AI Agent Standards Initiative** (launched · Feb 2026; track: agentic) — Early US-government work toward governing autonomous-agent identity and action.
 

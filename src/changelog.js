@@ -1,6 +1,17 @@
 // Release notes — rendered by the Changelog page and the RSS feed generator.
 export const CHANGES = [
   {
+    version: '0.5', date: '2026-09-08', title: 'Identity proofing, and a hardening pass',
+    items: [
+      'New foundation lesson: identity proofing & eKYC — assurance levels (NIST SP 800-63A), document/chip verification, and why injection attacks slip past liveness detection.',
+      'Standards radar adds NIST SP 800-63A and ISO/IEC 30107-3; five new glossary terms.',
+      'Unknown URLs now return a real 404 page with a 404 status, instead of silently serving the homepage.',
+      'Every page has a proper <h1>, matching what the prerendered HTML already served to crawlers.',
+      'Security: react-router upgraded past the open-redirect advisory; HSTS added to every response.',
+      'Engineering: CI now builds, lints, and runs content-integrity tests on every PR.',
+    ],
+  },
+  {
     version: '0.4', date: '2026-07-06', title: 'Fact-check refresh',
     items: [
       'Re-verified every agent claim against live primary docs (July 2026) after a deep fact-check pass.',

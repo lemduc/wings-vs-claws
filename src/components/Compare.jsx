@@ -12,7 +12,7 @@ export default function Compare() {
       <section id="compare">
         <div className="section-head">
           <div className="eyebrow">head to head</div>
-          <h2><span className="fn">diff</span><span className="pn"> hermes.iam openclaw.iam</span></h2>
+          <h1><span className="fn">diff</span><span className="pn"> hermes.iam openclaw.iam</span></h1>
           <p>Eight IAM dimensions, side by side. Every cell traces to the projects' own security docs.</p>
         </div>
         <div className="dims">

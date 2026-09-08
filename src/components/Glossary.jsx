@@ -35,7 +35,7 @@ export default function Glossary() {
       <div className="wrap">
         <div className="section-head">
           <div className="eyebrow">reference</div>
-          <h2><span className="fn">glossary</span><span className="pn">.iam</span></h2>
+          <h1><span className="fn">glossary</span><span className="pn">.iam</span></h1>
           <p>The vocabulary used across this site, defined. Press <b>⌘K</b> to jump to any term.</p>
         </div>
 
