@@ -8,6 +8,9 @@
 - **MCP Authorization** (spec · 2025-11; track: agentic) — An OAuth 2.1 profile for the Model Context Protocol — how agent clients get scoped access to tools and servers.
 - **NIST SP 800-63A — Identity Proofing** (established; track: enterprise) — Assurance levels (IAL1-3) for how strongly a real person was bound to an account at enrollment.
 - **ISO/IEC 30107-3 — Presentation Attack Detection** (established; track: enterprise) — How liveness/anti-spoof systems are tested — and why injection attacks fall outside what it measures.
+- **RFC 9449 — DPoP** (RFC (2023); track: both) — Proof-of-possession for OAuth tokens: binds a token to a key so a stolen one cannot be replayed.
+- **RFC 8705 — mTLS-bound tokens** (RFC (2020); track: enterprise) — Binds an access token to the client certificate it was issued to — the other route to sender-constrained tokens.
+- **OpenID Shared Signals Framework** (established; track: both) — Push signals (CAEP) so a session can be ended across relying parties instead of waiting for a token to expire.
 - **SPIFFE / SPIRE** (CNCF; track: enterprise) — Verifiable, short-lived workload identity (SVIDs) without stored secrets.
 - **NIST AI Agent Standards Initiative** (launched · Feb 2026; track: agentic) — Early US-government work toward governing autonomous-agent identity and action.
 

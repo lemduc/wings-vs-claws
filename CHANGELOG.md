@@ -38,6 +38,27 @@ guide to IAM for the AI-agent era.
 
 **Content**
 
+- New foundation lesson **Sessions, tokens & revocation**. The site covered
+  token issuance and stopped. This covers what happens after: server-side
+  session record vs self-contained token, the four things that decide whether
+  a session is safe, **revocation latency** as the real exposure window,
+  sender-constrained tokens (DPoP RFC 9449, mTLS-bound RFC 8705) against
+  bearer-token theft, and validating a token properly rather than parsing it.
+- New foundation lesson **Audit, logging & forensics**. The comparison had an
+  audit dimension but no lesson: where identity events come from and who else
+  reads them, what a good record contains (including the "why", the field most
+  often missing), the absence of any single logging standard as a procurement
+  question, tiered retention, and the fact that you can only investigate what
+  you were permitted to collect.
+- New case file **Storm-0558**: forged tokens signed with a 2016 consumer
+  signing key that leaked into a crash dump, accepted for enterprise tenants
+  through a separate validation flaw. ~25 organizations, ~60,000 emails from
+  one department, six weeks. Found via a `MailItemsAccessed` log that required
+  a premium licence tier — the control that mattered was a paid add-on. Sourced
+  to the CSRB review.
+- Supporting reference: DPoP, mTLS-bound tokens and the OpenID Shared Signals
+  Framework on the standards radar; revocation latency, sender-constrained
+  token, bearer token and correlation ID in the glossary.
 - New foundation lesson **Identity proofing & eKYC**, placed first in the
   foundations sequence: proofing vs authentication, identity assurance levels
   (NIST SP 800-63A IAL1–3), what remote eKYC actually checks, ICAO 9303 passive

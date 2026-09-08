@@ -309,6 +309,10 @@ export const VERDICT = {
 // IAM glossary — concise, sourced definitions of the jargon used on the site.
 // rel: 'both' | 'hermes' | 'openclaw' (whose mechanism the term leans on).
 export const GLOSSARY = [
+  { term: 'Revocation latency', rel: 'both', def: 'The gap between revoking access and the last valid credential expiring. Self-contained tokens stay usable inside that window, which is why short lifetimes are a security parameter, not a convenience setting.' },
+  { term: 'Sender-constrained token', rel: 'both', def: 'A token bound to a key the caller must prove it holds on every request — DPoP (RFC 9449) or mTLS-bound (RFC 8705). A stolen one is inert without the key, unlike a bearer token.' },
+  { term: 'Bearer token', rel: 'both', def: 'A token that grants access to whoever presents it, with no proof of possession. Convenient, and indistinguishable from theft once stolen.' },
+  { term: 'Correlation ID', rel: 'both', def: 'An identifier carried across services so one login can be stitched to the downstream calls it caused. Without it an investigation has fragments, not a story.' },
   { term: 'Identity proofing', rel: 'both', def: 'Binding a real-world person to a new account at enrollment, before any credential exists. NIST SP 800-63A grades the strength as IAL1–IAL3.' },
   { term: 'eKYC', rel: 'both', def: 'Remote identity proofing: verify the ID document is genuine, that it belongs to a real person, and that the person presenting it is live and present.' },
   { term: 'Presentation attack', rel: 'both', def: 'Spoofing shown to the sensor — a printed photo, screen replay, or mask. What liveness detection (ISO/IEC 30107-3) is designed to catch.' },
@@ -587,6 +591,55 @@ export const LESSONS = [
     ],
   },
   {
+    slug: 'sessions-tokens', icon: '🎫', level: 'Foundation',
+    title: 'Sessions, tokens & revocation',
+    tldr: 'Logging in is the easy part. The hard part is everything after: how the system keeps remembering you, how long that memory lasts, and how fast you can take it back.',
+    sections: [
+      { h: 'A session is a memory; a token is a claim', p: 'There are two ways to stay logged in. The server can keep a session record and hand you an opaque id that points at it — every request costs a lookup, but the server can end the session instantly. Or it can hand you a self-contained token that carries the claims and a signature — no lookup needed, which is why it scales, but the server has now given away a statement it cannot take back before expiry. Most modern stacks pick the second and then spend their effort managing that consequence.' },
+      { h: 'Four things decide whether a session is safe', p: 'How it is bound (a cookie with HttpOnly, Secure and SameSite, or a token bound to a key), how long it lives, how it is renewed — a refresh that rotates, so a stolen refresh token is detectable when it is replayed — and how it ends: logout, idle timeout, and an absolute lifetime. Getting one right and the other three wrong is the usual shape of a session bug.' },
+      { h: 'Revocation latency is the real exposure', p: 'Revoking access is not instant. There is a gap between disabling an account and the last valid token expiring, and inside that gap the credential still works. That window is the number worth knowing: a one-hour access token means up to an hour of access after you thought you had cut it off. Short lifetimes and rotation shrink the window; token introspection or a push signal like the OpenID Shared Signals Framework closes it, at the cost of a live dependency.' },
+      { h: 'Bearer tokens are cash; sender-constrained tokens are not', p: 'A bearer token grants access to whoever holds it — steal it and you are indistinguishable from the user. Sender-constrained tokens bind the token to a key the caller must prove it holds on every request: DPoP (RFC 9449) with a proof signature, or mTLS-bound tokens (RFC 8705) with a client certificate. A stolen token without the matching key is inert — the same idea as PKCE, applied to the token instead of the code.' },
+      { h: 'The receiver has to actually check', p: 'A signature only helps if someone verifies it, and verification means more than "does it parse". Check the signature against the expected key, the issuer, the audience, the expiry, and the algorithm — reject alg "none", and reject a key that has no business signing for this audience. A token validly signed by the wrong issuer and accepted anyway is not a broken token. It is a broken door.' },
+    ],
+    flow: [
+      { label: 'Authenticate', sub: 'once' },
+      { label: 'Issue', sub: 'session or token' },
+      { label: 'Present', sub: 'every request' },
+      { label: 'Renew', sub: 'rotate' },
+      { label: 'Revoke', sub: 'mind the gap' },
+    ],
+    code: {
+      label: 'in practice — validating a token, not just parsing it',
+      body: `# Wrong: the token parses, therefore we trust it.
+claims = jwt.decode(token, options={"verify_signature": False})   # never
+user = claims["sub"]
+
+# Right: every field the token's authority rests on is checked.
+claims = jwt.decode(
+    token,
+    key=jwks.get_signing_key(kid).key,   # a key this issuer is allowed to use
+    algorithms=["RS256"],                # pinned — never trust the header's alg
+    issuer="https://idp.example.com/",   # who minted it
+    audience="https://api.example.com/", # who it was minted FOR
+)                                        # exp / nbf verified by default
+
+# Still not done: a valid signature says nothing about revocation.
+if store.is_revoked(claims["jti"]):
+    raise Unauthorized("token revoked before expiry")`,
+    },
+    agentTwist: 'Agents hold credentials for long unattended stretches and hand them down to sub-agents, so revocation latency stops being a footnote and becomes the blast radius: the question is not whether you can revoke an agent, but how much it can still do in the minutes after you did. That argues for short-lived, sender-constrained, narrowly-scoped tokens issued per task rather than a standing credential in a config file — and for the delegation chain to travel inside the token, so a resource can refuse the whole branch at once.',
+    related: [
+      { to: '/learn/tokens-oauth', label: 'Tokens, OAuth & OIDC' },
+      { to: '/learn/audit-forensics', label: 'Audit & forensics' },
+      { to: '/learn/agent-delegation', label: 'Agent delegation' },
+    ],
+    quiz: [
+      { q: 'Why can a self-contained token be harder to revoke than a server-side session?', options: ['It is encrypted', 'There is no server record to delete — it stays valid until it expires', 'It is longer'], answer: 1, explain: 'The point of a self-contained token is that no lookup is needed, which also means there is nothing to delete.' },
+      { q: '"Revocation latency" is…', options: ['How long the revoke API call takes', 'The gap between revoking access and the last valid credential expiring', 'The time taken to detect a breach'], answer: 1, explain: 'Access keeps working inside that window, which is why token lifetime is a security parameter.' },
+      { q: 'A stolen DPoP-bound token is useless to an attacker because…', options: ['It is single-use', 'They also need the private key it is bound to', 'It expires in one second'], answer: 1, explain: 'Sender-constrained tokens require proof of possession on every request, so holding the token is not enough.' },
+    ],
+  },
+  {
     slug: 'mfa', icon: '🔐', level: 'Foundation',
     title: 'MFA & step-up authentication',
     tldr: 'Multi-factor auth requires more than one proof of identity. Step-up adds a fresh check right before a risky action.',
@@ -647,6 +700,35 @@ $ grpcurl -unix /run/spire/agent.sock \\
       { q: 'Workload identity aims to replace…', options: ['Hardcoded, long-lived secrets', 'Encryption', 'Usernames'], answer: 0, explain: 'Provable identity instead of stored secrets.' },
       { q: 'A SPIFFE SVID is…', options: ['A long-lived password', 'A short-lived, verifiable workload ID', 'An API key'], answer: 1, explain: 'Short-lived and cryptographically verifiable.' },
       { q: 'Workload identity is essentially…', options: ['Zero Trust for machines', 'A firewall', 'A VPN'], answer: 0, explain: 'Attested, rotating identity — Zero Trust applied to workloads.' },
+    ],
+  },
+  {
+    slug: 'audit-forensics', icon: '🧾', level: 'Foundation',
+    title: 'Audit, logging & forensics',
+    tldr: 'Every access decision is a record you might need later. What you can investigate after an incident was decided long before it — by what you chose to collect, and what you were allowed to.',
+    sections: [
+      { h: 'Identity events come from everywhere, and investigators are not the only readers', p: 'Sign-ins, directory changes, consent grants, token issuance, policy decisions and admin actions are produced by different systems and land in one pipeline. Security investigation is only one consumer of it — compliance reporting, access reviews, billing and product analytics read the same stream and want different fields and different retention. Designing the pipeline for investigation alone is how teams end up with logs nobody can afford to keep.' },
+      { h: 'What a good identity record contains', p: 'Who acted, what they did, when, from where, on whose behalf, what the decision was, and why — plus a correlation id that stitches one login to the twenty downstream calls it caused. The "why" is the field most often missing and most often needed: a log that says "denied" without the rule that denied it turns every investigation into a re-derivation.' },
+      { h: 'There is no single logging standard, and that is a procurement question', p: 'Each layer brings its own: syslog and CEF at the infrastructure edge, OpenTelemetry for traces, cloud-provider audit schemas for control-plane actions, SCIM events for lifecycle changes, and vendor-specific formats for the identity provider itself. Nothing normalizes them for you. When evaluating a platform, "which events, in what schema, retained how long, exportable how" is a sharper question than "do you have audit logs".' },
+      { h: 'Retention is tiered because storage is not free', p: 'Hot storage answers this week’s questions in seconds; warm holds months at query latency; cold is cheap archive you restore under subpoena. The trap is choosing tiers on cost alone and finding the window you kept is shorter than the time it takes to notice a breach — typically measured in months, not days. Authentication failures, privilege changes and consent grants are the categories worth keeping longest.' },
+      { h: 'You can only investigate what you were permitted to collect', p: 'In the Storm-0558 intrusion, the victim that discovered the campaign did so using a mailbox-access log available only in a higher-priced licence tier; organizations without it could not have seen the same activity in their own tenants. After public pressure the vendor made the expanded logs available at every tier and doubled the default retention. The control that mattered was not a preventive one — read the case file.' },
+    ],
+    flow: [
+      { label: 'Emit', sub: 'decision + reason' },
+      { label: 'Collect', sub: 'one pipeline' },
+      { label: 'Retain', sub: 'hot / warm / cold' },
+      { label: 'Investigate', sub: 'correlate' },
+    ],
+    agentTwist: 'An agent multiplies events — one human instruction becomes hundreds of tool calls — and it acts on behalf of someone, so a log line naming only the agent answers the wrong question. The record has to carry the actor chain (the token’s act claim is exactly this) so you can ask "what did this agent do, for which user, under whose authority" and get an answer. Without it, attribution stops at the service account, and so does the investigation.',
+    related: [
+      { to: '/learn/sessions-tokens', label: 'Sessions, tokens & revocation' },
+      { to: '/cases', label: 'Case files' },
+      { to: '/compare', label: 'Audit in the comparison' },
+    ],
+    quiz: [
+      { q: 'Which field is most often missing from an identity log and most needed in an investigation?', options: ['The timestamp', 'The reason for the decision', 'The user agent'], answer: 1, explain: 'A bare "allowed" or "denied" forces the investigator to re-derive why, months later, from a policy that may since have changed.' },
+      { q: 'Why does a correlation id matter?', options: ['It compresses the log', 'It stitches one login to the downstream calls it caused', 'It encrypts the record'], answer: 1, explain: 'Without it, one session’s activity is scattered across systems with no way to reassemble it.' },
+      { q: 'The logging lesson of Storm-0558 is that…', options: ['Logs should be encrypted', 'Detection capability can sit behind a licence tier', 'Logs should be kept forever'], answer: 1, explain: 'The victim detected it through a mailbox-access log that required a premium tier; others could not have seen the same activity.' },
     ],
   },
   {
@@ -711,6 +793,9 @@ export const STANDARDS = [
   { name: 'MCP Authorization', status: 'spec · 2025-11', track: 'agentic', what: 'An OAuth 2.1 profile for the Model Context Protocol — how agent clients get scoped access to tools and servers.' },
   { name: 'NIST SP 800-63A — Identity Proofing', status: 'established', track: 'enterprise', what: 'Assurance levels (IAL1-3) for how strongly a real person was bound to an account at enrollment.' },
   { name: 'ISO/IEC 30107-3 — Presentation Attack Detection', status: 'established', track: 'enterprise', what: 'How liveness/anti-spoof systems are tested — and why injection attacks fall outside what it measures.' },
+  { name: 'RFC 9449 — DPoP', status: 'RFC (2023)', track: 'both', what: 'Proof-of-possession for OAuth tokens: binds a token to a key so a stolen one cannot be replayed.' },
+  { name: 'RFC 8705 — mTLS-bound tokens', status: 'RFC (2020)', track: 'enterprise', what: 'Binds an access token to the client certificate it was issued to — the other route to sender-constrained tokens.' },
+  { name: 'OpenID Shared Signals Framework', status: 'established', track: 'both', what: 'Push signals (CAEP) so a session can be ended across relying parties instead of waiting for a token to expire.' },
   { name: 'SPIFFE / SPIRE', status: 'CNCF', track: 'enterprise', what: 'Verifiable, short-lived workload identity (SVIDs) without stored secrets.' },
   { name: 'NIST AI Agent Standards Initiative', status: 'launched · Feb 2026', track: 'agentic', what: 'Early US-government work toward governing autonomous-agent identity and action.' },
 ]
@@ -722,10 +807,21 @@ export const STANDARDS_SOURCES = [
   { label: 'SPIFFE — Secure Production Identity Framework', url: 'https://spiffe.io/' },
   { label: 'NIST SP 800-63A — Identity Proofing & Enrollment', url: 'https://pages.nist.gov/800-63-3/sp800-63a.html' },
   { label: 'ICAO Doc 9303 — Machine Readable Travel Documents', url: 'https://www.icao.int/publications/pages/publication.aspx?docnum=9303' },
+  { label: 'RFC 9449 — OAuth 2.0 Demonstrating Proof of Possession (DPoP)', url: 'https://www.rfc-editor.org/rfc/rfc9449' },
+  { label: 'CSRB — Review of the Summer 2023 Microsoft Exchange Online Intrusion', url: 'https://www.cisa.gov/sites/default/files/2025-03/CSRBReviewOfTheSummer2023MEOIntrusion508.pdf' },
 ]
 
 // ── Case files: learn from real (and representative) failures ───────────────
 export const CASES = [
+  {
+    id: 'storm-0558', icon: '🗝️', title: 'The forged token, and the log you had to pay for', year: '2023',
+    severity: 'real incident',
+    what: 'From 15 May 2023, the actor tracked as Storm-0558 forged authentication tokens using a 2016 Microsoft consumer (MSA) signing key that had leaked into a corporate crash dump. A separate validation flaw let that consumer key be accepted for enterprise accounts, so a key that should only ever have signed for consumer mailboxes could mint tokens for government tenants. Around 25 organizations were affected; roughly 60,000 emails were downloaded from the State Department alone, over at least six weeks. The State Department found it on 15 June 2023 with a custom rule over the MailItemsAccessed mailbox-auditing log — a log it had only because it held a licence tier including Purview Audit (Premium). The Cyber Safety Review Board called the intrusion preventable and the vendor’s security culture inadequate; the vendor still does not know how the key was stolen. In February 2024 it made the expanded logs available at every tier and raised default retention from 90 to 180 days.',
+    identity: 'A signing key is the root of an identity system’s trust. One leaked key plus a validation gap meant tokens for any user could be minted at will — and nothing downstream could tell a forged-but-validly-signed token from a real one, because the signature was genuine.',
+    stopper: 'On prevention: strict issuer and audience validation, so a consumer key is refused for an enterprise tenant no matter how good the signature, plus key isolation and rotation that assumes a key will eventually leak. On detection: the mailbox-access log — the only reason anyone noticed. That control was a paid add-on, which is the uncomfortable part.',
+    era: 'Era 4 — cloud & federation', maps: 'Audit & redaction / token validation',
+    source: 'https://www.cisa.gov/sites/default/files/2025-03/CSRBReviewOfTheSummer2023MEOIntrusion508.pdf',
+  },
   {
     id: 'salesloft-drift', icon: '🔓', title: 'The Salesloft–Drift OAuth-token breach', year: '2025',
     severity: 'real incident',
@@ -791,6 +887,7 @@ export const LEARNING_PATHS = [
       { to: '/learn/authn-vs-authz', label: 'AuthN vs AuthZ' },
       { to: '/learn/access-models', label: 'Access models' },
       { to: '/learn/tokens-oauth', label: 'Tokens, OAuth & OIDC' },
+      { to: '/learn/sessions-tokens', label: 'Sessions & revocation' },
       { to: '/learn/zero-trust', label: 'Zero Trust' },
       { to: '/journey', label: 'The journey of IAM' },
     ],
@@ -811,6 +908,7 @@ export const LEARNING_PATHS = [
       { to: '/compare', label: 'IAM diff & control matrix' },
       { to: '/topology', label: 'Enforcement topology' },
       { to: '/playground', label: 'Config posture' },
+      { to: '/learn/audit-forensics', label: 'Audit & forensics' },
       { to: '/cases', label: 'Case files' },
       { to: '/quiz', label: 'Test yourself' },
     ],

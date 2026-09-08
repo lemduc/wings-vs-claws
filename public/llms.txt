@@ -14,9 +14,11 @@ factual claims trace to primary sources.
 - [Access models: ACL, RBAC, ABAC](https://iam.vjsonline.org/md/access-models.md): Three ways to express "who can do what" — lists, roles, and policies — trading simplicity for flexibility.
 - [Federation & Single Sign-On](https://iam.vjsonline.org/md/federation-sso.md): Federation lets an identity from one place sign in somewhere else. SSO means one login works across many apps.
 - [Tokens, OAuth 2.0 & OIDC](https://iam.vjsonline.org/md/tokens-oauth.md): OAuth lets an app act on your behalf without your password, using scoped, expiring tokens. OIDC adds "who you are" on top.
+- [Sessions, tokens & revocation](https://iam.vjsonline.org/md/sessions-tokens.md): Logging in is the easy part. The hard part is everything after: how the system keeps remembering you, how long that memory lasts, and how fast you can take it back.
 - [MFA & step-up authentication](https://iam.vjsonline.org/md/mfa.md): Multi-factor auth requires more than one proof of identity. Step-up adds a fresh check right before a risky action.
 - [Zero Trust & least privilege](https://iam.vjsonline.org/md/zero-trust.md): Never trust, always verify. Drop the network perimeter; make every request prove identity and context, and grant the least privilege that works.
 - [Workload identity & SPIFFE](https://iam.vjsonline.org/md/workload-identity.md): Workloads — services, containers, agents — need verifiable identity without baked-in secrets. SPIFFE gives them one.
+- [Audit, logging & forensics](https://iam.vjsonline.org/md/audit-forensics.md): Every access decision is a record you might need later. What you can investigate after an incident was decided long before it — by what you chose to collect, and what you were allowed to.
 - [Non-human identities (NHIs)](https://iam.vjsonline.org/md/nhi.md): Most identities are not people — they are service accounts, API keys, workloads, and now agents. They outnumber humans 100:1+ and are a top breach vector.
 - [Delegation & on-behalf-of for agents](https://iam.vjsonline.org/md/agent-delegation.md): Agents act for you and hand work to sub-agents. The hard part: carry authority down the chain without over-granting — and keep it auditable.
 

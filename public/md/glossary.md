@@ -1,5 +1,9 @@
 # IAM Glossary (agentic identity)
 
+- **Revocation latency** — The gap between revoking access and the last valid credential expiring. Self-contained tokens stay usable inside that window, which is why short lifetimes are a security parameter, not a convenience setting.
+- **Sender-constrained token** — A token bound to a key the caller must prove it holds on every request — DPoP (RFC 9449) or mTLS-bound (RFC 8705). A stolen one is inert without the key, unlike a bearer token.
+- **Bearer token** — A token that grants access to whoever presents it, with no proof of possession. Convenient, and indistinguishable from theft once stolen.
+- **Correlation ID** — An identifier carried across services so one login can be stitched to the downstream calls it caused. Without it an investigation has fragments, not a story.
 - **Identity proofing** — Binding a real-world person to a new account at enrollment, before any credential exists. NIST SP 800-63A grades the strength as IAL1–IAL3.
 - **eKYC** — Remote identity proofing: verify the ID document is genuine, that it belongs to a real person, and that the person presenting it is live and present.
 - **Presentation attack** — Spoofing shown to the sensor — a printed photo, screen replay, or mask. What liveness detection (ISO/IEC 30107-3) is designed to catch.

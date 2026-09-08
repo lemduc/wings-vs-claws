@@ -33,7 +33,7 @@ export const PAGE_META = {
   },
   '/foundations': {
     title: 'IAM Foundations — core concepts, explained',
-    description: 'Short visual lessons on identity proofing and eKYC, AuthN vs AuthZ, access models, OAuth/OIDC, Zero Trust, non-human identities, and agent delegation.',
+    description: 'Short visual lessons on identity proofing and eKYC, AuthN vs AuthZ, access models, OAuth/OIDC, sessions and revocation, Zero Trust, audit and forensics, non-human identities, and agent delegation.',
   },
   '/journey': {
     title: 'The journey of IAM — pre-AI to agents',
@@ -77,7 +77,7 @@ export const PAGE_META = {
   },
   '/cases': {
     title: 'Case files — learn from agent & NHI breaches',
-    description: 'Real and representative ways non-human identity goes wrong — and the one control that would have changed the outcome.',
+    description: 'Real and representative ways machine and non-human identity goes wrong — forged tokens, stolen OAuth grants, poisoned skills — and the one control that would have changed each outcome.',
   },
   '/standards': {
     title: 'Standards radar — protocols for agentic IAM',

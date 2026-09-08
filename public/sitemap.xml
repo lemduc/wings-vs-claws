@@ -21,9 +21,11 @@
   <url><loc>https://iam.vjsonline.org/learn/access-models</loc></url>
   <url><loc>https://iam.vjsonline.org/learn/federation-sso</loc></url>
   <url><loc>https://iam.vjsonline.org/learn/tokens-oauth</loc></url>
+  <url><loc>https://iam.vjsonline.org/learn/sessions-tokens</loc></url>
   <url><loc>https://iam.vjsonline.org/learn/mfa</loc></url>
   <url><loc>https://iam.vjsonline.org/learn/zero-trust</loc></url>
   <url><loc>https://iam.vjsonline.org/learn/workload-identity</loc></url>
+  <url><loc>https://iam.vjsonline.org/learn/audit-forensics</loc></url>
   <url><loc>https://iam.vjsonline.org/learn/nhi</loc></url>
   <url><loc>https://iam.vjsonline.org/learn/agent-delegation</loc></url>
 </urlset>
