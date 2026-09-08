@@ -45,7 +45,7 @@ export const PAGE_META = {
   },
   '/topology': {
     title: 'Enforcement topology — defense-in-depth vs gate chain',
-    description: 'How Hermes stacks seven defensive layers while OpenClaw chains permission gates. Two shapes of least privilege, visualized.',
+    description: 'How Hermes stacks eight defensive layers while OpenClaw chains permission gates. Two shapes of least privilege, visualized.',
   },
   '/trace': {
     title: 'Access trace simulator — agentic IAM in action',
@@ -61,7 +61,7 @@ export const PAGE_META = {
   },
   '/game': {
     title: 'Defense in Depth — an IAM mini-game',
-    description: 'Block incoming threats by arming the right defensive layer. Learn the seven-layer model by playing it.',
+    description: 'Block incoming threats by arming the right defensive layer. Learn the eight-layer model by playing it.',
   },
   '/playground': {
     title: 'Config posture playground — score your agent IAM',

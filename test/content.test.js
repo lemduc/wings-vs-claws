@@ -4,7 +4,7 @@
 // metadata, a quiz answer pointing past the end of its options list.
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { LESSONS, GLOSSARY, LEARNING_PATHS, CASES, STANDARDS, VERIFIED, METHODOLOGY } from '../src/data.js'
+import { LESSONS, GLOSSARY, LEARNING_PATHS, CASES, STANDARDS, VERIFIED, METHODOLOGY, HERMES_LAYERS, THREATS, AGENTS } from '../src/data.js'
 import { PAGE_META, metaFor, NOT_FOUND_META } from '../src/seo.js'
 import { ALL_ROUTES, SITEMAP_ROUTES } from '../src/seo-build.js'
 import { PAGES } from '../src/nav.js'
@@ -128,5 +128,35 @@ describe('freshness', () => {
   it('explains the rating scale', () => {
     expect(METHODOLOGY.length).toBeGreaterThanOrEqual(3)
     for (const m of METHODOLOGY) expect(m.p.length, m.h).toBeGreaterThan(100)
+  })
+})
+
+describe('the Hermes layer model', () => {
+  // Hermes went from 7 to 8 layers between the July and September fact-checks.
+  // The layer count is referenced by the diagram, the game's keyboard handler,
+  // the threat mapping, and the copy — so assert they cannot fall out of step.
+  it('maps every threat to a layer that exists', () => {
+    for (const t of THREATS) {
+      expect(t.layer, t.id).toBeGreaterThanOrEqual(1)
+      expect(t.layer, t.id).toBeLessThanOrEqual(HERMES_LAYERS.length)
+    }
+  })
+
+  it('gives every layer at least one threat, so the game can teach it', () => {
+    const covered = new Set(THREATS.map((t) => t.layer))
+    for (let i = 1; i <= HERMES_LAYERS.length; i++) {
+      expect(covered.has(i), `layer ${i} (${HERMES_LAYERS[i - 1].short}) has no threat`).toBe(true)
+    }
+  })
+
+  it('states the layer count consistently in prose', () => {
+    const n = HERMES_LAYERS.length
+    expect(AGENTS.hermes.iamModel).toContain(`${n}-layer`)
+    // No page may spell the count out — it drifts. Read HERMES_LAYERS instead.
+    const words = /\b(\d+|three|four|five|six|seven|eight|nine|ten)[- ](layers?\b|defensive layers\b)/i
+    for (const f of ['Architecture', 'Game']) {
+      const src = readFileSync(new URL(`../src/components/${f}.jsx`, import.meta.url), 'utf8')
+      expect(src, `${f}.jsx spells out the layer count`).not.toMatch(words)
+    }
   })
 })

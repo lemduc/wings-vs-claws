@@ -136,12 +136,12 @@ export default function Game() {
     resolve(n === threat.layer, threat.layer)
   }, [phase, resolved, threat, resolve])
 
-  // Keyboard: 1-7 to arm a layer, Enter to start / restart.
+  // Keyboard: 1-N to arm a layer, Enter to start / restart.
   useEffect(() => {
     function onKey(e) {
       if (e.key === 'Enter' && phase !== 'playing') { start(); return }
       const n = Number(e.key)
-      if (n >= 1 && n <= 7) pick(n)
+      if (n >= 1 && n <= HERMES_LAYERS.length) pick(n)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -155,7 +155,7 @@ export default function Game() {
           <h1><span className="fn">defenseInDepth</span><span className="pn">()</span></h1>
           <p>
             Threats race toward the core. Arm the Hermes layer that actually stops each one —
-            press <b>1–7</b> or click. Block it before it lands. Three cores. Go.
+            press <b>1–{HERMES_LAYERS.length}</b> or click. Block it before it lands. Three cores. Go.
           </p>
         </div>
 

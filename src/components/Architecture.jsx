@@ -16,8 +16,9 @@ const C = {
 }
 const MONO = 'monospace'
 
-// Hermes — cascading "defense in depth": a request must pass through all 7
-// stacked layers before reaching the contained core.
+// Hermes — cascading "defense in depth": a request must pass through every
+// stacked layer before reaching the contained core. Geometry is derived from
+// HERMES_LAYERS.length so the diagram survives the model gaining a layer.
 function HermesDiagram() {
   const cardW = 188
   const cardH = 30
@@ -25,9 +26,13 @@ function HermesDiagram() {
   const y0 = 50
   const dx = 7
   const dy = 33
+  const n = HERMES_LAYERS.length
+  const coreY = y0 + n * dy + 14
+  const coreH = 30
+  const vbH = coreY + coreH + 12
   return (
-    <svg viewBox="0 0 360 340" width="100%" role="img"
-      aria-label="Hermes defense-in-depth: a request passes through seven stacked security layers to a contained core">
+    <svg viewBox={`0 0 360 ${vbH}`} width="100%" role="img"
+      aria-label={`Hermes defense-in-depth: a request passes through ${HERMES_LAYERS.length} stacked security layers to a contained core`}>
       <defs>
         <marker id="h-arw" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
           <path d="M0,0 L6,3 L0,6 Z" style={{ fill: C.hermes }} />
@@ -39,7 +44,7 @@ function HermesDiagram() {
       <text x="70" y="26" textAnchor="middle" fontSize="11" fontFamily={MONO} style={{ fill: C.muted }}>access request</text>
       <line x1="46" y1="34" x2={x0 + 24} y2={y0 - 3} strokeWidth="1.4" markerEnd="url(#h-arw)" style={{ stroke: C.hermes }} />
 
-      {/* 7 cascading layers (outer -> inner) */}
+      {/* cascading layers (outer -> inner) */}
       {HERMES_LAYERS.map((l, i) => {
         const x = x0 + i * dx
         const y = y0 + i * dy
@@ -55,8 +60,8 @@ function HermesDiagram() {
       })}
 
       {/* contained core */}
-      <rect x="78" y="298" width="210" height="30" rx="6" style={{ fill: C.bg, stroke: C.green }} />
-      <text x="183" y="317" textAnchor="middle" fontSize="11" fontFamily={MONO} style={{ fill: C.green }}>🔒 container = the boundary</text>
+      <rect x="78" y={coreY} width="210" height={coreH} rx="6" style={{ fill: C.bg, stroke: C.green }} />
+      <text x="183" y={coreY + 19} textAnchor="middle" fontSize="11" fontFamily={MONO} style={{ fill: C.green }}>🔒 container = the boundary</text>
     </svg>
   )
 }
@@ -119,7 +124,7 @@ export default function Architecture() {
         <div className="eyebrow">the iam model, visualized</div>
         <h1><span className="fn">enforcement</span><span className="pn">.topology</span></h1>
         <p>
-          Hermes stacks seven independent defensive layers — a request must survive all of
+          Hermes stacks {HERMES_LAYERS.length} independent defensive layers — a request must survive all of
           them. OpenClaw chains permission gates that each must say "allow." Two different
           shapes of "least privilege."
         </p>
@@ -130,7 +135,7 @@ export default function Architecture() {
           <div className="term-bar" style={{ borderBottomColor: 'var(--hermes-dim)' }}>
             <span className="dot r" /><span className="dot y" /><span className="dot g" />
             <span className="lbl">🪽 Hermes — defense-in-depth</span>
-            <span className="fname">7 layers</span>
+            <span className="fname">{HERMES_LAYERS.length} layers</span>
           </div>
           <div className="term-body">
             <HermesDiagram />

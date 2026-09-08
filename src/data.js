@@ -2,7 +2,7 @@
 // Wings vs Claws — an IAM-focused comparison of two open-source agents.
 // Every claim below is traceable to the projects' own security docs + guides.
 //
-// Sources (retrieved June 2026; re-verified against live docs July 2026):
+// Sources (retrieved June 2026; re-verified against live docs September 2026):
 //   Hermes:   https://hermes-agent.nousresearch.com/docs/user-guide/security
 //             https://hermes-agent.nousresearch.com/docs/user-guide/configuration
 //             https://github.com/NousResearch/hermes-agent/blob/main/SECURITY.md
@@ -25,7 +25,7 @@ export const AGENTS = {
     symbol: '🪽',
     creator: 'Nous Research',
     license: 'MIT',
-    iamModel: '7-layer defense-in-depth',
+    iamModel: '8-layer defense-in-depth',
     motto: 'Deny by default, contain by design.',
     blurb:
       'Layered, container-centric IAM: the sandbox is the security boundary, ' +
@@ -70,14 +70,14 @@ export const IAM_DIMENSIONS = [
     hermes:
       'Allowlist-based; effectively owner-vs-user. No formal role tiers — authority is expressed through who is on which allowlist.',
     openclaw:
-      'Explicit role-based access: operator vs non-operator. Per-group allowlists (groupAllowFrom) and dmScope:"per-channel-peer" isolate context per sender.',
+      'Explicit role-based access: operator vs non-operator. Per-group allowlists (groupAllowFrom) and dmScope:"per-channel-peer" isolate context per sender. tools.sessions.visibility defaults to "all" — gateway-wide session reach — and must be narrowed to "agent" or "self" by hand.',
   },
   {
     id: 'tools',
     dimension: 'Tool / action permissions',
     sub: "The principal's blast radius",
     hermes:
-      'Dangerous-command approval modes: manual (default, always prompt), smart (LLM risk score → auto allow/deny), off (--yolo). Approval prompts fail closed — deny — after a 60s timeout. A hardline blocklist (rm -rf /, fork bombs, disk format) is refused even under --yolo.',
+      'Dangerous-command approval modes: smart (default — an auxiliary LLM scores risk, auto-approving low-risk calls and escalating uncertain ones), manual (always prompt), off. Approval prompts fail closed — deny — after a 300s timeout. User deny rules (approvals.deny, fnmatch globs) are matched before YOLO or off mode is consulted, and a hardline blocklist (rm -rf /, fork bombs, mkfs, dd to block devices, piping untrusted URLs to a root shell) is refused even under --yolo.',
     openclaw:
       'Three independent permission gates: agent-level tool allow/deny, sandbox-level tool filter, and container network access — all must permit an action. Default "messaging" profile disables automation/runtime/fs groups; tools.elevated bypass is off by default.',
   },
@@ -86,25 +86,25 @@ export const IAM_DIMENSIONS = [
     dimension: 'Secrets & credentials',
     sub: 'How API keys and tokens are handled',
     hermes:
-      'MCP subprocesses receive only safe vars (PATH, HOME, USER, LANG, TERM, SHELL, TMPDIR, XDG_*); everything with KEY/TOKEN/SECRET/PASSWORD is stripped. Skills declare required_environment_variables / required_credential_files; files mount read-only. Errors redact ghp_…, sk-…, bearer tokens.',
+      'MCP subprocesses receive only safe vars (PATH, HOME, USER, LANG, LC_ALL, TERM, SHELL, TMPDIR, XDG_*); anything matching KEY/TOKEN/SECRET/PASSWORD/CREDENTIAL/PASSWD/AUTH is stripped. Skills declare required_environment_variables / required_credential_files; files mount read-only. Protected paths (~/.ssh, ~/.aws, ~/.kube, .env, /etc/sudoers) are blocked from write_file and patch outright. Errors redact ghp_…, sk-…, bearer tokens.',
     openclaw:
-      'Provider credentials live in a per-agent SQLite store (openclaw-agent.sqlite; legacy JSON is migrated via `openclaw doctor --fix`) or behind SecretRef providers (env / file / exec — static credentials only), injected at runtime. Plaintext still works, and agent-readable files (openclaw.json, .env) stay exposed. Untrusted workspace .env files cannot override OPENCLAW_* or provider credentials.',
+      'Provider credentials live in a per-agent SQLite store (agents/<id>/agent/openclaw-agent.sqlite), with OAuth tokens and dynamic client secrets in state/openclaw.sqlite, or behind SecretRef providers (env / file / exec / credential store — static credentials only), injected at runtime. State is chmod 700 with openclaw.json at 600, but plaintext still works and agent-readable files stay exposed. Untrusted workspace .env files cannot override OPENCLAW_* or provider credentials.',
   },
   {
     id: 'isolation',
     dimension: 'Execution isolation',
     sub: 'Sandboxing & resource boundaries',
     hermes:
-      'Default backend is local — commands run on the host with no isolation; containers are an opt-in switch. When used, hardened: --cap-drop ALL, --security-opt no-new-privileges, --pids-limit 256, tmpfs /tmp with nosuid (root inside unless docker_run_as_host_user). Backends: local / ssh / docker / singularity / modal / daytona. SSRF guard blocks RFC-1918, loopback, link-local, and cloud-metadata addresses.',
+      'Default backend is local — commands run on the host with no isolation; containers are an opt-in switch. When used, hardened: --cap-drop ALL, --security-opt no-new-privileges, --pids-limit 256, tmpfs /tmp with nosuid (root inside unless docker_run_as_host_user). Backends: local / ssh / docker / singularity / modal / daytona / vercel_sandbox. HERMES_WRITE_SAFE_ROOT can additionally confine writes to a directory prefix (set to /opt/data in the official image). SSRF guard blocks RFC-1918, loopback, link-local, CGNAT (100.64.0.0/10) and cloud-metadata addresses; allow_private_urls defaults false.',
     openclaw:
-      'Sandboxing is off by default (agents.defaults.sandbox.mode: "off") — an opt-in switch, like Hermes. When enabled: sandbox scope agent / session / shared, workspace access none / ro / rw, host target sandbox (Docker) / gateway (host) / node (remote). Docker network is disabled by default, so even allowed web tools fail until opened.',
+      'Sandboxing is off by default — an opt-in switch, like Hermes. When enabled the Docker backend is hardened out of the box: capDrop ALL, no-new-privileges, readOnlyRoot, a non-root sandbox user, and network "none", so even allowed web tools fail until egress is opened. Scope is agent (default) / session / shared; workspace access none (default) / ro / rw. Backends: docker / podman / ssh / OpenShell managed remote sandboxes.',
   },
   {
     id: 'principal',
     dimension: 'Agent as principal',
     sub: 'Treating the agent as a non-human identity',
     hermes:
-      'Implicit: identity is enforced through the 7 layers (authorization, approval, isolation, credential filtering, scanning, session isolation, sanitization) rather than a named principal object.',
+      'Implicit: identity is enforced through the 8 layers (authorization, approval, file-write safety, isolation, credential filtering, scanning, session isolation, sanitization) rather than a named principal object.',
     openclaw:
       'Explicit: the agent is documented as "a new security principal on your system — a non-human identity that can take actions, touch data, and move across systems."',
   },
@@ -124,14 +124,14 @@ export const IAM_DIMENSIONS = [
     hermes:
       'Credential redaction in tool errors, supply-chain advisory checks at startup and in `hermes doctor`, SHA-256-verified pre-exec scanning (Tirith), context-file injection scanning.',
     openclaw:
-      '`openclaw security audit` reviews inbound policies, tool blast radius, filesystem perms, network exposure, and skill supply chain. logging.redactSensitive masks secrets in logs and transcripts by default.',
+      '`openclaw security audit` (--deep probes a live gateway, --fix applies safe remediations, --json for CI) reviews inbound access policy, cross-agent session visibility, tool blast radius, exec drift, network exposure, and plugin loading, emitting structured findings keyed by checkId (e.g. gateway.bind_no_auth). Log redaction is on and cannot be disabled; logging.redactPatterns adds custom rules.',
   },
   {
     id: 'posture',
     dimension: 'Default posture',
     sub: 'Where the design optimizes',
     hermes:
-      'Defense-in-depth with manual approval on by default; when a container backend is used, command checks defer to the container as the boundary.',
+      'Defense-in-depth with smart (LLM-scored) approval on by default; when a container backend is used, command checks defer to the container as the boundary.',
     openclaw:
       'Personal-assistant first: "one trusted operator boundary per gateway." Multi-tenant hostile isolation is explicitly out of scope — mixed-trust setups should use separate gateways, credentials, and OS users.',
   },
@@ -140,7 +140,7 @@ export const IAM_DIMENSIONS = [
 // When the agent claims on this page were last checked against the projects'
 // live primary docs. One constant, so no page can drift out of step with the
 // others. Update it with every fact-check pass (and add a changelog entry).
-export const VERIFIED = { date: '2026-07-06', label: 'July 2026' }
+export const VERIFIED = { date: '2026-09-08', label: 'September 2026' }
 
 // How to read the ratings. Stated openly, because a comparison that grades two
 // projects owes the reader its standard — especially for the ◐ cells, which are
@@ -179,12 +179,13 @@ export const IAM_MATRIX = [
   { control: 'Secret redaction in logs & errors', hermes: 'yes', openclaw: 'yes' },
 ]
 
-// Hermes 7-layer model (for the architecture diagram). short = label shown
+// Hermes 8-layer model (for the architecture diagram). short = label shown
 // inside the diagram layer; full = the one-line detail in the legend.
 export const HERMES_LAYERS = [
   { short: 'User authorization', full: 'allowlists + DM pairing' },
-  { short: 'Command approval', full: 'manual / smart / off' },
-  { short: 'Container isolation', full: 'docker / singularity / modal / daytona (opt-in)' },
+  { short: 'Command approval', full: 'smart / manual / off' },
+  { short: 'File write safety', full: 'protected-path denylist + write root' },
+  { short: 'Container isolation', full: 'docker / singularity / modal / daytona / vercel (opt-in)' },
   { short: 'Credential filtering', full: 'strip secrets from subprocess env' },
   { short: 'Context scanning', full: 'prompt-injection detection' },
   { short: 'Session isolation', full: 'no shared state, no traversal' },
@@ -274,20 +275,22 @@ export const TRACES = {
 }
 
 // "Defense in Depth" mini-game. Each threat is blocked by exactly one of the
-// 7 Hermes layers (1-based index into HERMES_LAYERS) — mapping follows the
+// 8 Hermes layers (1-based index into HERMES_LAYERS) — mapping follows the
 // documented mechanism that stops it.
 export const THREATS = [
   { id: 't-stranger', icon: '👤', name: 'Unknown user', desc: 'a stranger DMs the agent and tells it to act', layer: 1 },
   { id: 't-pairspam', icon: '📨', name: 'Pairing brute-force', desc: 'attacker spams pairing-code guesses', layer: 1 },
   { id: 't-rmrf', icon: '☠️', name: 'Destructive command', desc: 'agent is told to run `rm -rf /`', layer: 2 },
   { id: 't-forkbomb', icon: '💣', name: 'Fork bomb', desc: ':(){ :|:& };: aims to exhaust the host', layer: 2 },
-  { id: 't-hostread', icon: '📂', name: 'Host file read', desc: 'a tool tries to read /etc/shadow on the host', layer: 3 },
-  { id: 't-escape', icon: '🪟', name: 'Sandbox escape', desc: 'process attempts to break out to the host', layer: 3 },
-  { id: 't-exfil', icon: '🔑', name: 'Token exfiltration', desc: 'code reads $GITHUB_TOKEN and POSTs it out', layer: 4 },
-  { id: 't-leak', icon: '🩹', name: 'Secret in error', desc: 'a tool error would leak `sk-…` in plaintext', layer: 4 },
-  { id: 't-inject', icon: '🧬', name: 'Prompt injection', desc: 'hidden instructions buried in AGENTS.md', layer: 5 },
-  { id: 't-snoop', icon: '🕵️', name: 'Cross-session snoop', desc: 'one session tries to read another user’s data', layer: 6 },
-  { id: 't-traversal', icon: '🧭', name: 'Path traversal', desc: 'workdir set to ../../etc to escape the jail', layer: 7 },
+  { id: 't-sshkey', icon: '🗝️', name: 'Authorized-key write', desc: 'agent is told to append a key to ~/.ssh/authorized_keys', layer: 3 },
+  { id: 't-envwrite', icon: '📝', name: 'Credential overwrite', desc: 'a patch quietly rewrites the project .env', layer: 3 },
+  { id: 't-hostread', icon: '📂', name: 'Host file read', desc: 'a tool tries to read /etc/shadow on the host', layer: 4 },
+  { id: 't-escape', icon: '🪟', name: 'Sandbox escape', desc: 'process attempts to break out to the host', layer: 4 },
+  { id: 't-exfil', icon: '🔑', name: 'Token exfiltration', desc: 'code reads $GITHUB_TOKEN and POSTs it out', layer: 5 },
+  { id: 't-leak', icon: '🩹', name: 'Secret in error', desc: 'a tool error would leak `sk-…` in plaintext', layer: 5 },
+  { id: 't-inject', icon: '🧬', name: 'Prompt injection', desc: 'hidden instructions buried in AGENTS.md', layer: 6 },
+  { id: 't-snoop', icon: '🕵️', name: 'Cross-session snoop', desc: 'one session tries to read another user’s data', layer: 7 },
+  { id: 't-traversal', icon: '🧭', name: 'Path traversal', desc: 'workdir set to ../../etc to escape the jail', layer: 8 },
 ]
 
 export const VERDICT = {
@@ -315,7 +318,7 @@ export const GLOSSARY = [
   { term: 'DM pairing code', rel: 'both', def: 'A short, expiring code an unknown sender must get approved before they can drive the agent. Hermes: 8 chars, 1h TTL, rate-limited, lockout after 5 fails.' },
   { term: 'Non-human identity', rel: 'openclaw', def: 'An autonomous agent treated as a security principal that takes actions and touches data. OpenClaw names this explicitly in its model.' },
   { term: 'Blast radius', rel: 'both', def: 'How much damage a compromised or over-eager agent can do. Both projects shrink it with isolation and least privilege.' },
-  { term: 'Defense in depth', rel: 'hermes', def: 'Stacking independent controls so one failure isn’t fatal — Hermes’ seven-layer model.' },
+  { term: 'Defense in depth', rel: 'hermes', def: 'Stacking independent controls so one failure isn’t fatal — Hermes’ eight-layer model.' },
   { term: 'SecretRef', rel: 'openclaw', def: 'OpenClaw’s indirection for secrets: values are pulled from env / file / exec providers at runtime, never written into config files. Static credentials only — OAuth profiles cannot use SecretRef (hard startup error).' },
   { term: 'Secret stripping', rel: 'hermes', def: 'Hermes removes anything matching KEY/TOKEN/SECRET/PASSWORD from a subprocess’ env unless a skill explicitly declares it needs it.' },
   { term: 'Hardline blocklist', rel: 'hermes', def: 'Commands Hermes refuses to run even under --yolo: rm -rf /, fork bombs, disk formatting, raw block-device writes.' },

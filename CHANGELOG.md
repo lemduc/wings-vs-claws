@@ -5,7 +5,30 @@ guide to IAM for the AI-agent era.
 
 ## v0.5 — September 2026
 
-### Identity proofing, and a hardening pass
+### Fact-check, identity proofing, and a hardening pass
+
+**Fact-check (against live primary docs, September 2026)**
+
+- **Hermes documents eight defense layers, not seven.** *File write safety* —
+  a protected-path denylist for `write_file`/`patch` plus the optional
+  `HERMES_WRITE_SAFE_ROOT` — is layer 3, shifting isolation through
+  sanitization down one. The topology diagram, the mini-game, the threat
+  mapping, and every mention of the count now derive from `HERMES_LAYERS`
+  rather than restating it, and tests fail if they drift apart again.
+- **The approval timeout is 300 seconds, not 60**, and **`smart` is the default
+  approval mode, not `manual`** — an auxiliary LLM scores risk, auto-approving
+  low-risk calls and escalating uncertain ones. Both were stated the other way.
+- Hermes additions: `vercel_sandbox` backend, `HERMES_WRITE_SAFE_ROOT`, CGNAT
+  and cloud-metadata ranges in the SSRF guard, `approvals.deny` glob rules
+  evaluated ahead of YOLO, and a wider env-strip list (`CREDENTIAL`, `PASSWD`,
+  `AUTH`) plus `LC_ALL` in the MCP passthrough.
+- OpenClaw: sandboxes are hardened by default once enabled — `capDrop: ["ALL"]`,
+  `no-new-privileges`, `readOnlyRoot`, a non-root user, and `network: "none"`.
+  Backends now include SSH and OpenShell managed remote sandboxes. OAuth tokens
+  and dynamic client secrets live in `state/openclaw.sqlite`; SecretRef gains a
+  credential-store provider. `security audit` grew `--deep`/`--fix`/`--json`
+  and structured `checkId` findings. `tools.sessions.visibility` defaults to
+  `all` — gateway-wide — and has to be narrowed by hand.
 
 **Content**
 
