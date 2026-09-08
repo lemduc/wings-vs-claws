@@ -24,10 +24,34 @@ export default function Game() {
   const [best, setBest] = useState(0)
 
   const tick = useRef(null)
+  const pending = useRef([])
   const livesRef = useRef(LIVES)
   const progressRef = useRef(0)
+  const scoreRef = useRef(0)
+  const idxRef = useRef(0)
+  const streakRef = useRef(0)
+  const resolvedRef = useRef(null)
   useEffect(() => { livesRef.current = lives }, [lives])
   useEffect(() => { progressRef.current = progress }, [progress])
+  useEffect(() => { scoreRef.current = score }, [score])
+  useEffect(() => { idxRef.current = idx }, [idx])
+  useEffect(() => { streakRef.current = streak }, [streak])
+  useEffect(() => { resolvedRef.current = resolved }, [resolved])
+
+  // Every deferred transition (advance / finish) is registered here so it can
+  // be cancelled. Previously these timers were fire-and-forget: leaving the
+  // page mid-round left them to run against an unmounted component, and a
+  // restart could not cancel work the previous round had already scheduled.
+  const clearPending = useCallback(() => {
+    pending.current.forEach(clearTimeout)
+    pending.current = []
+  }, [])
+
+  const later = useCallback((fn, ms) => {
+    pending.current.push(setTimeout(fn, ms))
+  }, [])
+
+  useEffect(() => () => { clearPending(); clearInterval(tick.current) }, [clearPending])
 
   useEffect(() => {
     try { setBest(Number(localStorage.getItem('wvc-best') || 0)) } catch { /* ignore */ }
@@ -36,75 +60,88 @@ export default function Game() {
   const threat = phase === 'playing' ? queue[idx] : null
 
   const start = useCallback(() => {
+    clearPending()
+    clearInterval(tick.current)
     setQueue(shuffle([...THREATS, ...THREATS, ...THREATS]))
     setIdx(0); setProgress(0); setLives(LIVES); setScore(0); setStreak(0)
+    resolvedRef.current = null
     setResolved(null); setPhase('playing')
-  }, [])
+  }, [clearPending])
 
   const finish = useCallback(() => {
     clearInterval(tick.current)
+    clearPending()
     setPhase('over')
-    setScore((s) => {
-      try {
-        const b = Number(localStorage.getItem('wvc-best') || 0)
-        if (s > b) { localStorage.setItem('wvc-best', String(s)); setBest(s) }
-      } catch { /* ignore */ }
-      return s
-    })
-  }, [])
+  }, [clearPending])
+
+  // Persist the high score as an effect — state updaters must stay pure.
+  useEffect(() => {
+    if (phase !== 'over') return
+    try {
+      const b = Number(localStorage.getItem('wvc-best') || 0)
+      if (scoreRef.current > b) {
+        localStorage.setItem('wvc-best', String(scoreRef.current))
+        setBest(scoreRef.current)
+      }
+    } catch { /* ignore */ }
+  }, [phase])
 
   const advance = useCallback(() => {
+    if (idxRef.current + 1 >= queue.length) { finish(); return }
+    resolvedRef.current = null
     setResolved(null); setProgress(0)
-    setIdx((i) => {
-      const ni = i + 1
-      if (ni >= queue.length) { finish(); return i }
-      return ni
-    })
+    setIdx((i) => i + 1)
   }, [queue.length, finish])
 
   // Resolve the current threat — either the player armed a layer, or it breached.
   const resolve = useCallback((ok, correctLayer) => {
     clearInterval(tick.current)
-    setResolved({ ok, correctLayer })
+    resolvedRef.current = { ok, correctLayer }
+    setResolved(resolvedRef.current)
     if (ok) {
       const bonus = Math.round(100 - progressRef.current) // earlier block = more points
       setScore((s) => s + 100 + bonus)
       setStreak((s) => s + 1)
-      setTimeout(advance, 850)
+      later(advance, 850)
     } else {
       setStreak(0)
       const nl = livesRef.current - 1
       setLives(nl)
-      if (nl <= 0) setTimeout(finish, 1500)
-      else setTimeout(advance, 1500)
+      if (nl <= 0) later(finish, 1500)
+      else later(advance, 1500)
     }
-  }, [advance, finish])
+  }, [advance, finish, later])
 
-  // Drive the threat toward the core.
+  // Drive the threat toward the core. Speed reads score/streak through refs so
+  // the interval keeps its 90ms cadence instead of being torn down and
+  // recreated on every point scored.
   useEffect(() => {
     if (phase !== 'playing' || resolved || !threat) return
     tick.current = setInterval(() => {
-      setProgress((p) => {
-        const step = 1.0 + Math.min(score / 1400, 1.7) + streak * 0.04
-        const np = p + step
-        if (np >= 100) { resolve(false, threat.layer); return 100 }
-        return np
-      })
+      const step = 1.0 + Math.min(scoreRef.current / 1400, 1.7) + streakRef.current * 0.04
+      const np = Math.min(progressRef.current + step, 100)
+      progressRef.current = np
+      setProgress(np)
+      // A threat that reaches the core breaches. Decided here in the timer
+      // rather than inside a state updater, which must stay pure. The ref
+      // guard stops a tick that lands before the effect tears the interval
+      // down from resolving the same threat twice.
+      if (np >= 100 && !resolvedRef.current) resolve(false, threat.layer)
     }, 90)
     return () => clearInterval(tick.current)
-  }, [phase, idx, resolved, threat, score, streak, resolve])
+  }, [phase, idx, resolved, threat, resolve])
 
   const pick = useCallback((n) => {
     if (phase !== 'playing' || resolved || !threat) return
     resolve(n === threat.layer, threat.layer)
   }, [phase, resolved, threat, resolve])
 
-  // Keyboard: 1-7 to arm a layer, Enter to start / restart.
+  // Keyboard: 1-N to arm a layer, Enter to start / restart.
   useEffect(() => {
     function onKey(e) {
       if (e.key === 'Enter' && phase !== 'playing') { start(); return }
       const n = Number(e.key)
-      if (n >= 1 && n <= 7) pick(n)
+      if (n >= 1 && n <= HERMES_LAYERS.length) pick(n)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -115,10 +152,10 @@ export default function Game() {
       <div className="wrap">
         <div className="section-head">
           <div className="eyebrow">mini-game</div>
-          <h2><span className="fn">defenseInDepth</span><span className="pn">()</span></h2>
+          <h1><span className="fn">defenseInDepth</span><span className="pn">()</span></h1>
           <p>
             Threats race toward the core. Arm the Hermes layer that actually stops each one —
-            press <b>1–7</b> or click. Block it before it lands. Three cores. Go.
+            press <b>1–{HERMES_LAYERS.length}</b> or click. Block it before it lands. Three cores. Go.
           </p>
         </div>
 

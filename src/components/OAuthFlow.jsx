@@ -44,7 +44,7 @@ export default function OAuthFlow() {
     <section id="oauth-flow">
       <div className="section-head">
         <div className="eyebrow">practice · lab</div>
-        <h2><span className="fn">oauthCodeFlow</span><span className="pn">() // step {step + 1}/{STEPS.length}</span></h2>
+        <h1><span className="fn">oauthCodeFlow</span><span className="pn">() // step {step + 1}/{STEPS.length}</span></h1>
         <p>
           The Authorization Code flow, one message at a time — how an app (or an agent) gets
           scoped access without ever seeing your password.

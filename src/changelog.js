@@ -1,6 +1,22 @@
 // Release notes — rendered by the Changelog page and the RSS feed generator.
 export const CHANGES = [
   {
+    version: '0.5', date: '2026-09-08', title: 'Fact-check, identity proofing, and a hardening pass',
+    items: [
+      'Hermes now documents an eight-layer model, not seven — file write safety (protected-path denylist plus an optional write root) joins as layer 3, and the diagrams, the game and the threat mapping follow it.',
+      'OpenClaw rated ✓ on SSRF / egress protection (was ◐): the SSRF policy is strict by default across the browser and web-fetch tools, independent of whether the sandbox is enabled.',
+      'Corrections: the approval timeout is 300s, not 60s, and smart (LLM-scored) is the default approval mode, not manual. OpenClaw sandboxes are hardened by default when enabled (capDrop ALL, no-new-privileges, readOnlyRoot, non-root user, network "none").',
+      'Two new foundation lessons: sessions, tokens & revocation (revocation latency, sender-constrained tokens via DPoP/mTLS, and validating a token rather than parsing it) and audit, logging & forensics.',
+      'New case file — Storm-0558: a forged token signed with a leaked consumer key, found only because the victim held the licence tier that included the mailbox-access log.',
+      'New foundation lesson: identity proofing & eKYC — assurance levels (NIST SP 800-63A), document/chip verification, and why injection attacks slip past liveness detection.',
+      'Standards radar adds NIST SP 800-63A and ISO/IEC 30107-3; five new glossary terms.',
+      'Unknown URLs now return a real 404 page with a 404 status, instead of silently serving the homepage.',
+      'Every page has a proper <h1>, matching what the prerendered HTML already served to crawlers.',
+      'Security: react-router upgraded past the open-redirect advisory; HSTS added to every response.',
+      'Engineering: CI now builds, lints, and runs content-integrity tests on every PR.',
+    ],
+  },
+  {
     version: '0.4', date: '2026-07-06', title: 'Fact-check refresh',
     items: [
       'Re-verified every agent claim against live primary docs (July 2026) after a deep fact-check pass.',

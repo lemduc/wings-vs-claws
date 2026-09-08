@@ -1,4 +1,4 @@
-import { STANDARDS, STANDARDS_SOURCES } from '../data.js'
+import { STANDARDS, STANDARDS_SOURCES, VERIFIED } from '../data.js'
 
 const TRACK = {
   enterprise: { label: 'enterprise', cls: 'tr-ent' },
@@ -12,7 +12,7 @@ export default function Standards() {
       <section id="standards">
         <div className="section-head">
           <div className="eyebrow">reference · the moving frontier</div>
-          <h2><span className="fn">standards</span><span className="pn">.radar</span></h2>
+          <h1><span className="fn">standards</span><span className="pn">.radar</span></h1>
           <p>
             Agentic IAM is being assembled from two directions: the <b className="tok-blue">enterprise</b> stack
             (OAuth, OIDC, SPIFFE) extended downward, and new <b className="tok-orange">agentic</b> work
@@ -45,7 +45,7 @@ export default function Standards() {
           ))}
         </ul>
         <p className="fine">
-          Status and dates reflect public materials as of June 2026; agent-identity standards
+          Status and dates reflect public materials as of {VERIFIED.label}; agent-identity standards
           are moving fast — treat this as a snapshot, not a spec.
         </p>
       </div>

@@ -22,7 +22,7 @@ export default function StartHere() {
     <section id="start">
       <div className="section-head">
         <div className="eyebrow">start here</div>
-        <h2>Learn IAM — from directories to agents</h2>
+        <h1>Learn IAM — from directories to agents</h1>
         <p>
           A hands-on tour of identity &amp; access management, ending where it gets hard: autonomous
           AI agents. Pick a path by where you’re starting from.

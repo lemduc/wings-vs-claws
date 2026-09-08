@@ -1,22 +1,26 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { GLOSSARY, SCENARIOS, LESSONS } from '../data.js'
 import { PAGES } from '../nav.js'
 
-function buildCommands() {
-  const pages = PAGES.map((p) => ({
-    kind: 'page', key: `p:${p.id}`, label: p.label, hint: p.blurb, path: p.path,
-  }))
-  const lessons = LESSONS.map((l) => ({
-    kind: 'page', key: `l:${l.slug}`, label: l.title, hint: 'lesson', path: `/learn/${l.slug}`,
-  }))
-  const terms = GLOSSARY.map((g) => ({
-    kind: 'term', key: `t:${g.term}`, label: g.term, hint: 'term', term: g.term,
-  }))
-  const scenarios = SCENARIOS.map((sc) => ({
-    kind: 'scenario', key: `c:${sc.id}`, label: sc.title, hint: 'run trace', scenario: sc.id,
-  }))
-  return [...pages, ...lessons, ...terms, ...scenarios]
+// Nav pages come from nav.js and cost nothing. Lessons, glossary terms and
+// scenarios live in data.js, which the palette loads on first open — keeping
+// the whole content set out of the initial bundle.
+const PAGE_COMMANDS = PAGES.map((p) => ({
+  kind: 'page', key: `p:${p.id}`, label: p.label, hint: p.blurb, path: p.path,
+}))
+
+function contentCommands({ LESSONS, GLOSSARY, SCENARIOS }) {
+  return [
+    ...LESSONS.map((l) => ({
+      kind: 'page', key: `l:${l.slug}`, label: l.title, hint: 'lesson', path: `/learn/${l.slug}`,
+    })),
+    ...GLOSSARY.map((g) => ({
+      kind: 'term', key: `t:${g.term}`, label: g.term, hint: 'term', term: g.term,
+    })),
+    ...SCENARIOS.map((sc) => ({
+      kind: 'scenario', key: `c:${sc.id}`, label: sc.title, hint: 'run trace', scenario: sc.id,
+    })),
+  ]
 }
 
 export default function CommandPalette() {
@@ -25,7 +29,21 @@ export default function CommandPalette() {
   const [active, setActive] = useState(0)
   const inputRef = useRef(null)
   const navigate = useNavigate()
-  const commands = useMemo(buildCommands, [])
+  const [content, setContent] = useState(null)
+  const commands = useMemo(
+    () => (content ? [...PAGE_COMMANDS, ...content] : PAGE_COMMANDS),
+    [content],
+  )
+
+  // Load the searchable content index the first time the palette is opened.
+  useEffect(() => {
+    if (!open || content) return
+    let cancelled = false
+    import('../data.js').then((mod) => {
+      if (!cancelled) setContent(contentCommands(mod))
+    })
+    return () => { cancelled = true }
+  }, [open, content])
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase()

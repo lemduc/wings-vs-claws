@@ -1,5 +1,12 @@
 # Case files — agent & NHI incidents
 
+## The forged token, and the log you had to pay for (2023, real incident)
+
+- What happened: From 15 May 2023, the actor tracked as Storm-0558 forged authentication tokens using a 2016 Microsoft consumer (MSA) signing key that had leaked into a corporate crash dump. A separate validation flaw let that consumer key be accepted for enterprise accounts, so a key that should only ever have signed for consumer mailboxes could mint tokens for government tenants. Around 25 organizations were affected; roughly 60,000 emails were downloaded from the State Department alone, over at least six weeks. The State Department found it on 15 June 2023 with a custom rule over the MailItemsAccessed mailbox-auditing log — a log it had only because it held a licence tier including Purview Audit (Premium). The Cyber Safety Review Board called the intrusion preventable and the vendor’s security culture inadequate; the vendor still does not know how the key was stolen. In February 2024 it made the expanded logs available at every tier and raised default retention from 90 to 180 days.
+- Identity angle: A signing key is the root of an identity system’s trust. One leaked key plus a validation gap meant tokens for any user could be minted at will — and nothing downstream could tell a forged-but-validly-signed token from a real one, because the signature was genuine.
+- What stops it: On prevention: strict issuer and audience validation, so a consumer key is refused for an enterprise tenant no matter how good the signature, plus key isolation and rotation that assumes a key will eventually leak. On detection: the mailbox-access log — the only reason anyone noticed. That control was a paid add-on, which is the uncomfortable part.
+- Maps to: Audit & redaction / token validation (Era 4 — cloud & federation)
+
 ## The Salesloft–Drift OAuth-token breach (2025, real incident)
 
 - What happened: Attackers obtained OAuth tokens from a widely-integrated third-party app and used them to pull data from hundreds of downstream environments — the biggest SaaS breach of the year, with ~10× the blast radius of prior incidents.

@@ -5,7 +5,7 @@ export default function Cases() {
     <section id="cases">
       <div className="section-head">
         <div className="eyebrow">reference · learn from failure</div>
-        <h2><span className="fn">caseFiles</span><span className="pn">[]</span></h2>
+        <h1><span className="fn">caseFiles</span><span className="pn">[]</span></h1>
         <p>
           Real (and representative) ways agent &amp; non-human identity goes wrong — and the one
           control that would have changed the outcome.

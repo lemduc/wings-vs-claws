@@ -10,7 +10,7 @@ export default function Foundations() {
     <section id="foundations">
       <div className="section-head">
         <div className="eyebrow">learn · core concepts</div>
-        <h2><span className="fn">foundations</span><span className="pn">.iam</span></h2>
+        <h1><span className="fn">foundations</span><span className="pn">.iam</span></h1>
         <p>
           The IAM primitives, each as a short visual lesson with a "how it changes for agents"
           twist and a quick knowledge check. {viewedCount}/{LESSONS.length} read.

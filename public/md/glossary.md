@@ -1,10 +1,19 @@
 # IAM Glossary (agentic identity)
 
+- **Revocation latency** — The gap between revoking access and the last valid credential expiring. Self-contained tokens stay usable inside that window, which is why short lifetimes are a security parameter, not a convenience setting.
+- **Sender-constrained token** — A token bound to a key the caller must prove it holds on every request — DPoP (RFC 9449) or mTLS-bound (RFC 8705). A stolen one is inert without the key, unlike a bearer token.
+- **Bearer token** — A token that grants access to whoever presents it, with no proof of possession. Convenient, and indistinguishable from theft once stolen.
+- **Correlation ID** — An identifier carried across services so one login can be stitched to the downstream calls it caused. Without it an investigation has fragments, not a story.
+- **Identity proofing** — Binding a real-world person to a new account at enrollment, before any credential exists. NIST SP 800-63A grades the strength as IAL1–IAL3.
+- **eKYC** — Remote identity proofing: verify the ID document is genuine, that it belongs to a real person, and that the person presenting it is live and present.
+- **Presentation attack** — Spoofing shown to the sensor — a printed photo, screen replay, or mask. What liveness detection (ISO/IEC 30107-3) is designed to catch.
+- **Injection attack** — Bypassing the camera and feeding a synthetic video stream into the app or driver. Liveness scores do not see it, because the frames never came from a sensor at all.
+- **Passive authentication** — Verifying the issuing authority’s signature over an ID chip’s data groups (ICAO Doc 9303) — far stronger evidence than OCR of the printed page.
 - **Deny-by-default** — Access is refused unless a rule explicitly allows it. Hermes’ gateway falls through to deny; OpenClaw requires an allowlist or approved pairing.
 - **DM pairing code** — A short, expiring code an unknown sender must get approved before they can drive the agent. Hermes: 8 chars, 1h TTL, rate-limited, lockout after 5 fails.
 - **Non-human identity** — An autonomous agent treated as a security principal that takes actions and touches data. OpenClaw names this explicitly in its model.
 - **Blast radius** — How much damage a compromised or over-eager agent can do. Both projects shrink it with isolation and least privilege.
-- **Defense in depth** — Stacking independent controls so one failure isn’t fatal — Hermes’ seven-layer model.
+- **Defense in depth** — Stacking independent controls so one failure isn’t fatal — Hermes’ eight-layer model.
 - **SecretRef** — OpenClaw’s indirection for secrets: values are pulled from env / file / exec providers at runtime, never written into config files. Static credentials only — OAuth profiles cannot use SecretRef (hard startup error).
 - **Secret stripping** — Hermes removes anything matching KEY/TOKEN/SECRET/PASSWORD from a subprocess’ env unless a skill explicitly declares it needs it.
 - **Hardline blocklist** — Commands Hermes refuses to run even under --yolo: rm -rf /, fork bombs, disk formatting, raw block-device writes.
@@ -13,7 +22,7 @@
 - **Operator vs non-operator** — OpenClaw’s role split: the operator holds privileged control of the gateway; everyone else is gated to a smaller surface.
 - **Sandbox scope** — OpenClaw bounds a sandbox to agent / session / shared, limiting what a single tool run can reach.
 - **Container as boundary** — When Hermes runs in docker / modal, the hardened container is the security boundary, so per-command checks defer to it.
-- **SSRF guard** — Hermes blocks URL tools from reaching private, loopback, link-local, and cloud-metadata addresses to stop server-side request forgery.
+- **SSRF guard** — Blocking URL tools from reaching private, loopback, link-local, and cloud-metadata addresses, to stop server-side request forgery. Hermes ships one with allow_private_urls off by default; OpenClaw applies a strict-by-default SSRF policy to its browser and web-fetch tools, refusing private networks unless explicitly opted out.
 - **Cross-session isolation** — Sessions can’t read each other’s data or state, so one user or task can’t leak into another.
 - **Subagent visibility** — OpenClaw scopes which sessions a child agent can see: self / tree / agent / all.
 - **Heartbeat** — OpenClaw’s scheduled polling loop that lets the agent act proactively rather than only on request.

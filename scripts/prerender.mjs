@@ -3,7 +3,8 @@
 // so crawlers / AI search / no-JS readers see the substance, not an empty div.
 // React's createRoot().render() replaces the static content on hydration.
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
-import { SITE, metaFor, SITEMAP_ROUTES } from '../src/seo.js'
+import { SITE } from '../src/seo.js'
+import { metaForBuild as metaFor, SITEMAP_ROUTES } from '../src/seo-build.js'
 import { LESSONS, GLOSSARY, CASES, STANDARDS, ERAS, IAM_DIMENSIONS, IAM_MATRIX } from '../src/data.js'
 
 const distDir = new URL('../dist/', import.meta.url)

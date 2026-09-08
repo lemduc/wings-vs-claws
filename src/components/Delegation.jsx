@@ -27,7 +27,7 @@ export default function Delegation() {
     <section id="delegation">
       <div className="section-head">
         <div className="eyebrow">practice · lab</div>
-        <h2><span className="fn">delegate</span><span className="pn">(user → agent → sub-agent)</span></h2>
+        <h1><span className="fn">delegate</span><span className="pn">(user → agent → sub-agent)</span></h1>
         <p>
           An agent acts for you and hands work to sub-agents. Watch what each hop is allowed to do —
           and why <b className="tok-blue">narrowing scope on every hop</b> (RFC 8693 token exchange)

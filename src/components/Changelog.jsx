@@ -5,7 +5,7 @@ export default function Changelog() {
     <section id="changelog">
       <div className="section-head">
         <div className="eyebrow">what’s new</div>
-        <h2><span className="fn">changelog</span><span className="pn"> // releases</span></h2>
+        <h1><span className="fn">changelog</span><span className="pn"> // releases</span></h1>
         <p>
           The site evolves as the agentic-IAM space does. Follow along via{' '}
           <a href="/feed.xml">RSS</a> or watch the{' '}

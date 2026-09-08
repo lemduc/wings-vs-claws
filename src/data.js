@@ -2,7 +2,7 @@
 // Wings vs Claws — an IAM-focused comparison of two open-source agents.
 // Every claim below is traceable to the projects' own security docs + guides.
 //
-// Sources (retrieved June 2026; re-verified against live docs July 2026):
+// Sources (retrieved June 2026; re-verified against live docs September 2026):
 //   Hermes:   https://hermes-agent.nousresearch.com/docs/user-guide/security
 //             https://hermes-agent.nousresearch.com/docs/user-guide/configuration
 //             https://github.com/NousResearch/hermes-agent/blob/main/SECURITY.md
@@ -25,7 +25,7 @@ export const AGENTS = {
     symbol: '🪽',
     creator: 'Nous Research',
     license: 'MIT',
-    iamModel: '7-layer defense-in-depth',
+    iamModel: '8-layer defense-in-depth',
     motto: 'Deny by default, contain by design.',
     blurb:
       'Layered, container-centric IAM: the sandbox is the security boundary, ' +
@@ -70,14 +70,14 @@ export const IAM_DIMENSIONS = [
     hermes:
       'Allowlist-based; effectively owner-vs-user. No formal role tiers — authority is expressed through who is on which allowlist.',
     openclaw:
-      'Explicit role-based access: operator vs non-operator. Per-group allowlists (groupAllowFrom) and dmScope:"per-channel-peer" isolate context per sender.',
+      'Explicit role-based access: operator vs non-operator. Per-group allowlists (groupAllowFrom) and dmScope:"per-channel-peer" isolate context per sender. tools.sessions.visibility defaults to "all" — gateway-wide session reach — and must be narrowed to "agent" or "self" by hand.',
   },
   {
     id: 'tools',
     dimension: 'Tool / action permissions',
     sub: "The principal's blast radius",
     hermes:
-      'Dangerous-command approval modes: manual (default, always prompt), smart (LLM risk score → auto allow/deny), off (--yolo). Approval prompts fail closed — deny — after a 60s timeout. A hardline blocklist (rm -rf /, fork bombs, disk format) is refused even under --yolo.',
+      'Dangerous-command approval modes: smart (default — an auxiliary LLM scores risk, auto-approving low-risk calls and escalating uncertain ones), manual (always prompt), off. Approval prompts fail closed — deny — after a 300s timeout. User deny rules (approvals.deny, fnmatch globs) are matched before YOLO or off mode is consulted, and a hardline blocklist (rm -rf /, fork bombs, mkfs, dd to block devices, piping untrusted URLs to a root shell) is refused even under --yolo.',
     openclaw:
       'Three independent permission gates: agent-level tool allow/deny, sandbox-level tool filter, and container network access — all must permit an action. Default "messaging" profile disables automation/runtime/fs groups; tools.elevated bypass is off by default.',
   },
@@ -86,25 +86,25 @@ export const IAM_DIMENSIONS = [
     dimension: 'Secrets & credentials',
     sub: 'How API keys and tokens are handled',
     hermes:
-      'MCP subprocesses receive only safe vars (PATH, HOME, USER, LANG, TERM, SHELL, TMPDIR, XDG_*); everything with KEY/TOKEN/SECRET/PASSWORD is stripped. Skills declare required_environment_variables / required_credential_files; files mount read-only. Errors redact ghp_…, sk-…, bearer tokens.',
+      'MCP subprocesses receive only safe vars (PATH, HOME, USER, LANG, LC_ALL, TERM, SHELL, TMPDIR, XDG_*); anything matching KEY/TOKEN/SECRET/PASSWORD/CREDENTIAL/PASSWD/AUTH is stripped. Skills declare required_environment_variables / required_credential_files; files mount read-only. Protected paths (~/.ssh, ~/.aws, ~/.kube, .env, /etc/sudoers) are blocked from write_file and patch outright. Errors redact ghp_…, sk-…, bearer tokens.',
     openclaw:
-      'Provider credentials live in a per-agent SQLite store (openclaw-agent.sqlite; legacy JSON is migrated via `openclaw doctor --fix`) or behind SecretRef providers (env / file / exec — static credentials only), injected at runtime. Plaintext still works, and agent-readable files (openclaw.json, .env) stay exposed. Untrusted workspace .env files cannot override OPENCLAW_* or provider credentials.',
+      'Provider credentials live in a per-agent SQLite store (agents/<id>/agent/openclaw-agent.sqlite), with OAuth tokens and dynamic client secrets in state/openclaw.sqlite, or behind SecretRef providers (env / file / exec / credential store — static credentials only), injected at runtime. State is chmod 700 with openclaw.json at 600, but plaintext still works and agent-readable files stay exposed. Untrusted workspace .env files cannot override OPENCLAW_* or provider credentials.',
   },
   {
     id: 'isolation',
     dimension: 'Execution isolation',
     sub: 'Sandboxing & resource boundaries',
     hermes:
-      'Default backend is local — commands run on the host with no isolation; containers are an opt-in switch. When used, hardened: --cap-drop ALL, --security-opt no-new-privileges, --pids-limit 256, tmpfs /tmp with nosuid (root inside unless docker_run_as_host_user). Backends: local / ssh / docker / singularity / modal / daytona. SSRF guard blocks RFC-1918, loopback, link-local, and cloud-metadata addresses.',
+      'Default backend is local — commands run on the host with no isolation; containers are an opt-in switch. When used, hardened: --cap-drop ALL, --security-opt no-new-privileges, --pids-limit 256, tmpfs /tmp with nosuid (root inside unless docker_run_as_host_user). Backends: local / ssh / docker / singularity / modal / daytona / vercel_sandbox. HERMES_WRITE_SAFE_ROOT can additionally confine writes to a directory prefix (set to /opt/data in the official image). SSRF guard blocks RFC-1918, loopback, link-local, CGNAT (100.64.0.0/10) and cloud-metadata addresses; allow_private_urls defaults false.',
     openclaw:
-      'Sandboxing is off by default (agents.defaults.sandbox.mode: "off") — an opt-in switch, like Hermes. When enabled: sandbox scope agent / session / shared, workspace access none / ro / rw, host target sandbox (Docker) / gateway (host) / node (remote). Docker network is disabled by default, so even allowed web tools fail until opened.',
+      'Sandboxing is off by default — an opt-in switch, like Hermes. When enabled the Docker backend is hardened out of the box: capDrop ALL, no-new-privileges, readOnlyRoot, a non-root sandbox user, and network "none", so even allowed web tools fail until egress is opened. Scope is agent (default) / session / shared; workspace access none (default) / ro / rw. Backends: docker / podman / ssh / OpenShell managed remote sandboxes. Independent of the sandbox, an SSRF policy is strict by default across the browser and web-fetch tools: private and internal destinations are refused unless dangerouslyAllowPrivateNetwork is set, requests are intercepted before any HTTP bytes leave, and the deny list is evaluated ahead of allow rules.',
   },
   {
     id: 'principal',
     dimension: 'Agent as principal',
     sub: 'Treating the agent as a non-human identity',
     hermes:
-      'Implicit: identity is enforced through the 7 layers (authorization, approval, isolation, credential filtering, scanning, session isolation, sanitization) rather than a named principal object.',
+      'Implicit: identity is enforced through the 8 layers (authorization, approval, file-write safety, isolation, credential filtering, scanning, session isolation, sanitization) rather than a named principal object.',
     openclaw:
       'Explicit: the agent is documented as "a new security principal on your system — a non-human identity that can take actions, touch data, and move across systems."',
   },
@@ -124,16 +124,43 @@ export const IAM_DIMENSIONS = [
     hermes:
       'Credential redaction in tool errors, supply-chain advisory checks at startup and in `hermes doctor`, SHA-256-verified pre-exec scanning (Tirith), context-file injection scanning.',
     openclaw:
-      '`openclaw security audit` reviews inbound policies, tool blast radius, filesystem perms, network exposure, and skill supply chain. logging.redactSensitive masks secrets in logs and transcripts by default.',
+      '`openclaw security audit` (--deep probes a live gateway, --fix applies safe remediations, --json for CI) reviews inbound access policy, cross-agent session visibility, tool blast radius, exec drift, network exposure, and plugin loading, emitting structured findings keyed by checkId (e.g. gateway.bind_no_auth). Log redaction is on and cannot be disabled; logging.redactPatterns adds custom rules.',
   },
   {
     id: 'posture',
     dimension: 'Default posture',
     sub: 'Where the design optimizes',
     hermes:
-      'Defense-in-depth with manual approval on by default; when a container backend is used, command checks defer to the container as the boundary.',
+      'Defense-in-depth with smart (LLM-scored) approval on by default; when a container backend is used, command checks defer to the container as the boundary.',
     openclaw:
       'Personal-assistant first: "one trusted operator boundary per gateway." Multi-tenant hostile isolation is explicitly out of scope — mixed-trust setups should use separate gateways, credentials, and OS users.',
+  },
+]
+
+// When the agent claims on this page were last checked against the projects'
+// live primary docs. One constant, so no page can drift out of step with the
+// others. Update it with every fact-check pass (and add a changelog entry).
+export const VERIFIED = { date: '2026-09-08', label: 'September 2026' }
+
+// How to read the ratings. Stated openly, because a comparison that grades two
+// projects owes the reader its standard — especially for the ◐ cells, which are
+// judgment calls rather than facts.
+export const METHODOLOGY = [
+  {
+    h: 'What the marks mean',
+    p: '✓ the control is a first-class, documented feature — named in the project’s own security documentation and on by default or configurable without workarounds. ◐ the control is partially met: possible but opt-in, narrower than the full control, or achieved as a side effect of another mechanism rather than offered directly. ✗ not a focus — the documentation does not claim it.',
+  },
+  {
+    h: 'Where the evidence comes from',
+    p: 'Every cell is read from each project’s own security and configuration documentation, listed in full on the glossary page. Nothing here comes from running the agents, reading their source, or testing the controls. A documented control that is broken in practice would still read as ✓ — this compares what the two projects commit to, not what they deliver.',
+  },
+  {
+    h: 'Why the ◐ cells are the interesting ones',
+    p: 'The ✓ and ✗ cells mostly restate the docs. The ◐ cells are where a judgment was made, and where a maintainer might reasonably disagree — the line between "supported" and "possible if you configure it" is not always crisp. Those calls are open to correction: the contribution guide explains how to challenge one with a documentation link.',
+  },
+  {
+    h: 'The comparison is scoped, and the projects move',
+    p: 'Scope is IAM only — authentication, authorization, secrets, isolation, delegation, audit, and default posture. Neither project is being assessed on capability, performance, or fitness for a task. Both ship quickly, so treat the verification date above as the claim’s expiry: past it, check the primary docs.',
   },
 ]
 
@@ -145,19 +172,20 @@ export const IAM_MATRIX = [
   { control: 'Env-var secret stripping from subprocess', hermes: 'yes', openclaw: 'partial' },
   { control: 'SecretRef / vault runtime injection', hermes: 'partial', openclaw: 'yes' },
   { control: 'Hardened container flags (cap-drop, no-new-privs)', hermes: 'yes', openclaw: 'partial' },
-  { control: 'SSRF / egress network protection', hermes: 'yes', openclaw: 'partial' },
+  { control: 'SSRF / egress network protection', hermes: 'yes', openclaw: 'yes' },
   { control: 'Per-subagent visibility scoping', hermes: 'partial', openclaw: 'yes' },
   { control: 'Built-in security-audit command', hermes: 'partial', openclaw: 'yes' },
   { control: 'Cross-session / context isolation', hermes: 'yes', openclaw: 'yes' },
   { control: 'Secret redaction in logs & errors', hermes: 'yes', openclaw: 'yes' },
 ]
 
-// Hermes 7-layer model (for the architecture diagram). short = label shown
+// Hermes 8-layer model (for the architecture diagram). short = label shown
 // inside the diagram layer; full = the one-line detail in the legend.
 export const HERMES_LAYERS = [
   { short: 'User authorization', full: 'allowlists + DM pairing' },
-  { short: 'Command approval', full: 'manual / smart / off' },
-  { short: 'Container isolation', full: 'docker / singularity / modal / daytona (opt-in)' },
+  { short: 'Command approval', full: 'smart / manual / off' },
+  { short: 'File write safety', full: 'protected-path denylist + write root' },
+  { short: 'Container isolation', full: 'docker / singularity / modal / daytona / vercel (opt-in)' },
   { short: 'Credential filtering', full: 'strip secrets from subprocess env' },
   { short: 'Context scanning', full: 'prompt-injection detection' },
   { short: 'Session isolation', full: 'no shared state, no traversal' },
@@ -247,20 +275,22 @@ export const TRACES = {
 }
 
 // "Defense in Depth" mini-game. Each threat is blocked by exactly one of the
-// 7 Hermes layers (1-based index into HERMES_LAYERS) — mapping follows the
+// 8 Hermes layers (1-based index into HERMES_LAYERS) — mapping follows the
 // documented mechanism that stops it.
 export const THREATS = [
   { id: 't-stranger', icon: '👤', name: 'Unknown user', desc: 'a stranger DMs the agent and tells it to act', layer: 1 },
   { id: 't-pairspam', icon: '📨', name: 'Pairing brute-force', desc: 'attacker spams pairing-code guesses', layer: 1 },
   { id: 't-rmrf', icon: '☠️', name: 'Destructive command', desc: 'agent is told to run `rm -rf /`', layer: 2 },
   { id: 't-forkbomb', icon: '💣', name: 'Fork bomb', desc: ':(){ :|:& };: aims to exhaust the host', layer: 2 },
-  { id: 't-hostread', icon: '📂', name: 'Host file read', desc: 'a tool tries to read /etc/shadow on the host', layer: 3 },
-  { id: 't-escape', icon: '🪟', name: 'Sandbox escape', desc: 'process attempts to break out to the host', layer: 3 },
-  { id: 't-exfil', icon: '🔑', name: 'Token exfiltration', desc: 'code reads $GITHUB_TOKEN and POSTs it out', layer: 4 },
-  { id: 't-leak', icon: '🩹', name: 'Secret in error', desc: 'a tool error would leak `sk-…` in plaintext', layer: 4 },
-  { id: 't-inject', icon: '🧬', name: 'Prompt injection', desc: 'hidden instructions buried in AGENTS.md', layer: 5 },
-  { id: 't-snoop', icon: '🕵️', name: 'Cross-session snoop', desc: 'one session tries to read another user’s data', layer: 6 },
-  { id: 't-traversal', icon: '🧭', name: 'Path traversal', desc: 'workdir set to ../../etc to escape the jail', layer: 7 },
+  { id: 't-sshkey', icon: '🗝️', name: 'Authorized-key write', desc: 'agent is told to append a key to ~/.ssh/authorized_keys', layer: 3 },
+  { id: 't-envwrite', icon: '📝', name: 'Credential overwrite', desc: 'a patch quietly rewrites the project .env', layer: 3 },
+  { id: 't-hostread', icon: '📂', name: 'Host file read', desc: 'a tool tries to read /etc/shadow on the host', layer: 4 },
+  { id: 't-escape', icon: '🪟', name: 'Sandbox escape', desc: 'process attempts to break out to the host', layer: 4 },
+  { id: 't-exfil', icon: '🔑', name: 'Token exfiltration', desc: 'code reads $GITHUB_TOKEN and POSTs it out', layer: 5 },
+  { id: 't-leak', icon: '🩹', name: 'Secret in error', desc: 'a tool error would leak `sk-…` in plaintext', layer: 5 },
+  { id: 't-inject', icon: '🧬', name: 'Prompt injection', desc: 'hidden instructions buried in AGENTS.md', layer: 6 },
+  { id: 't-snoop', icon: '🕵️', name: 'Cross-session snoop', desc: 'one session tries to read another user’s data', layer: 7 },
+  { id: 't-traversal', icon: '🧭', name: 'Path traversal', desc: 'workdir set to ../../etc to escape the jail', layer: 8 },
 ]
 
 export const VERDICT = {
@@ -279,11 +309,20 @@ export const VERDICT = {
 // IAM glossary — concise, sourced definitions of the jargon used on the site.
 // rel: 'both' | 'hermes' | 'openclaw' (whose mechanism the term leans on).
 export const GLOSSARY = [
+  { term: 'Revocation latency', rel: 'both', def: 'The gap between revoking access and the last valid credential expiring. Self-contained tokens stay usable inside that window, which is why short lifetimes are a security parameter, not a convenience setting.' },
+  { term: 'Sender-constrained token', rel: 'both', def: 'A token bound to a key the caller must prove it holds on every request — DPoP (RFC 9449) or mTLS-bound (RFC 8705). A stolen one is inert without the key, unlike a bearer token.' },
+  { term: 'Bearer token', rel: 'both', def: 'A token that grants access to whoever presents it, with no proof of possession. Convenient, and indistinguishable from theft once stolen.' },
+  { term: 'Correlation ID', rel: 'both', def: 'An identifier carried across services so one login can be stitched to the downstream calls it caused. Without it an investigation has fragments, not a story.' },
+  { term: 'Identity proofing', rel: 'both', def: 'Binding a real-world person to a new account at enrollment, before any credential exists. NIST SP 800-63A grades the strength as IAL1–IAL3.' },
+  { term: 'eKYC', rel: 'both', def: 'Remote identity proofing: verify the ID document is genuine, that it belongs to a real person, and that the person presenting it is live and present.' },
+  { term: 'Presentation attack', rel: 'both', def: 'Spoofing shown to the sensor — a printed photo, screen replay, or mask. What liveness detection (ISO/IEC 30107-3) is designed to catch.' },
+  { term: 'Injection attack', rel: 'both', def: 'Bypassing the camera and feeding a synthetic video stream into the app or driver. Liveness scores do not see it, because the frames never came from a sensor at all.' },
+  { term: 'Passive authentication', rel: 'both', def: 'Verifying the issuing authority’s signature over an ID chip’s data groups (ICAO Doc 9303) — far stronger evidence than OCR of the printed page.' },
   { term: 'Deny-by-default', rel: 'both', def: 'Access is refused unless a rule explicitly allows it. Hermes’ gateway falls through to deny; OpenClaw requires an allowlist or approved pairing.' },
   { term: 'DM pairing code', rel: 'both', def: 'A short, expiring code an unknown sender must get approved before they can drive the agent. Hermes: 8 chars, 1h TTL, rate-limited, lockout after 5 fails.' },
   { term: 'Non-human identity', rel: 'openclaw', def: 'An autonomous agent treated as a security principal that takes actions and touches data. OpenClaw names this explicitly in its model.' },
   { term: 'Blast radius', rel: 'both', def: 'How much damage a compromised or over-eager agent can do. Both projects shrink it with isolation and least privilege.' },
-  { term: 'Defense in depth', rel: 'hermes', def: 'Stacking independent controls so one failure isn’t fatal — Hermes’ seven-layer model.' },
+  { term: 'Defense in depth', rel: 'hermes', def: 'Stacking independent controls so one failure isn’t fatal — Hermes’ eight-layer model.' },
   { term: 'SecretRef', rel: 'openclaw', def: 'OpenClaw’s indirection for secrets: values are pulled from env / file / exec providers at runtime, never written into config files. Static credentials only — OAuth profiles cannot use SecretRef (hard startup error).' },
   { term: 'Secret stripping', rel: 'hermes', def: 'Hermes removes anything matching KEY/TOKEN/SECRET/PASSWORD from a subprocess’ env unless a skill explicitly declares it needs it.' },
   { term: 'Hardline blocklist', rel: 'hermes', def: 'Commands Hermes refuses to run even under --yolo: rm -rf /, fork bombs, disk formatting, raw block-device writes.' },
@@ -292,7 +331,7 @@ export const GLOSSARY = [
   { term: 'Operator vs non-operator', rel: 'openclaw', def: 'OpenClaw’s role split: the operator holds privileged control of the gateway; everyone else is gated to a smaller surface.' },
   { term: 'Sandbox scope', rel: 'openclaw', def: 'OpenClaw bounds a sandbox to agent / session / shared, limiting what a single tool run can reach.' },
   { term: 'Container as boundary', rel: 'hermes', def: 'When Hermes runs in docker / modal, the hardened container is the security boundary, so per-command checks defer to it.' },
-  { term: 'SSRF guard', rel: 'hermes', def: 'Hermes blocks URL tools from reaching private, loopback, link-local, and cloud-metadata addresses to stop server-side request forgery.' },
+  { term: 'SSRF guard', rel: 'both', def: 'Blocking URL tools from reaching private, loopback, link-local, and cloud-metadata addresses, to stop server-side request forgery. Hermes ships one with allow_private_urls off by default; OpenClaw applies a strict-by-default SSRF policy to its browser and web-fetch tools, refusing private networks unless explicitly opted out.' },
   { term: 'Cross-session isolation', rel: 'both', def: 'Sessions can’t read each other’s data or state, so one user or task can’t leak into another.' },
   { term: 'Subagent visibility', rel: 'openclaw', def: 'OpenClaw scopes which sessions a child agent can see: self / tree / agent / all.' },
   { term: 'Heartbeat', rel: 'openclaw', def: 'OpenClaw’s scheduled polling loop that lets the agent act proactively rather than only on request.' },
@@ -341,7 +380,7 @@ export const PLAYGROUND = [
       { v: 'off', label: 'off by default', risk: 0 },
       { v: 'open', label: 'open egress', risk: 15 },
     ],
-    note: 'Open egress enables exfiltration and SSRF. OpenClaw disables container network by default; Hermes adds an SSRF guard.',
+    note: 'Open egress enables exfiltration and SSRF. Both refuse private and internal destinations by default; OpenClaw also disables the sandbox container network outright.',
   },
   {
     id: 'elevated', label: 'sandbox_bypass', default: 'off',
@@ -436,6 +475,34 @@ export const JOURNEY_SOURCES = [
 // Each lesson: concept → diagram (flow) → "how it changes for agents" → quiz.
 export const LESSONS = [
   {
+    slug: 'identity-proofing', icon: '🛂', level: 'Foundation',
+    title: 'Identity proofing & eKYC',
+    tldr: 'Before a system can authenticate you, someone has to decide the account is really yours. Identity proofing is that first, hardest step — and the one attackers now target with synthetic media.',
+    sections: [
+      { h: 'Proofing is not authentication', p: 'Authentication checks a credential you already hold. Identity proofing (enrollment) is what happens before that credential exists: binding a real-world person to a new account. Get it wrong and every later control is perfectly enforcing access for the wrong human. NIST SP 800-63A separates this as its own assurance dimension — IAL1 (self-asserted), IAL2 (evidence checked remotely or in person), IAL3 (in-person, verified by a trained operator).' },
+      { h: 'What eKYC actually checks', p: 'Remote proofing ("eKYC" in finance and telecom) usually chains three checks: the document is genuine, the document belongs to a real person, and the person presenting it is alive and present. Modern ID documents carry a signed chip — passive authentication under ICAO Doc 9303 verifies the issuer’s signature over the data groups, which is far stronger than reading printed text with OCR.' },
+      { h: 'Presentation vs injection attacks', p: 'Liveness detection under ISO/IEC 30107-3 is built to catch presentation attacks — a printed photo, a screen replay, a silicone mask held up to the camera. Injection attacks skip the camera entirely and feed a synthetic video stream straight into the app or driver. Generative face-swapping made these cheap, and a PAD score alone does not see them: the frames look perfectly live because, as far as the sensor pipeline knows, they are.' },
+      { h: 'Defending the capture path', p: 'Because the weak point is the path rather than the picture, the controls are path controls: attest the app and device, verify the frames came from a real sensor, bind the session to a signed challenge the attacker cannot pre-render, check the chip rather than the printed face, and keep a human review lane for the cases the score cannot settle.' },
+    ],
+    flow: [
+      { label: 'Evidence', sub: 'document + chip' },
+      { label: 'Verify', sub: 'genuine & unaltered' },
+      { label: 'Bind', sub: 'liveness → this person' },
+      { label: 'Enroll', sub: 'credential issued' },
+    ],
+    agentTwist: 'Agents inherit whatever the proofing step got right or wrong — an agent acting on behalf of a fraudulently enrolled account is a perfectly authorized path to someone else’s money. The reverse problem is newer: agents are also the ones submitting selfies and documents now, so "is a human present?" stops being a safe proxy for "is this the right human?". Expect proofing evidence to travel with the delegation chain, so a resource can ask how strongly the underlying human was ever verified.',
+    related: [
+      { to: '/learn/authn-vs-authz', label: 'AuthN vs AuthZ' },
+      { to: '/learn/mfa', label: 'MFA & phishing resistance' },
+      { to: '/standards', label: 'Standards radar' },
+    ],
+    quiz: [
+      { q: 'Identity proofing happens…', options: ['Every time you log in', 'Once, when the account is created', 'Only when you reset a password'], answer: 1, explain: 'Proofing binds a real person to an account at enrollment; authentication then checks the credential that enrollment issued.' },
+      { q: 'An attacker feeds a generated video straight into the app, bypassing the camera. This is…', options: ['A presentation attack', 'An injection attack'], answer: 1, explain: 'Presentation attacks are shown to the sensor; injection attacks replace the sensor feed. Liveness scoring is aimed at the former.' },
+      { q: 'Reading an ID document’s signed chip is stronger than OCR of the printed page because…', options: ['It is faster', 'The issuer’s signature can be verified', 'It works offline'], answer: 1, explain: 'ICAO 9303 passive authentication verifies the issuing authority’s signature over the data — printed text can simply be forged.' },
+    ],
+  },
+  {
     slug: 'authn-vs-authz', icon: '🪪', level: 'Foundation',
     title: 'Authentication vs Authorization',
     tldr: 'Authentication proves who you are. Authorization decides what you may do. Agents add a third question: who are you acting for?',
@@ -524,6 +591,55 @@ export const LESSONS = [
     ],
   },
   {
+    slug: 'sessions-tokens', icon: '🎫', level: 'Foundation',
+    title: 'Sessions, tokens & revocation',
+    tldr: 'Logging in is the easy part. The hard part is everything after: how the system keeps remembering you, how long that memory lasts, and how fast you can take it back.',
+    sections: [
+      { h: 'A session is a memory; a token is a claim', p: 'There are two ways to stay logged in. The server can keep a session record and hand you an opaque id that points at it — every request costs a lookup, but the server can end the session instantly. Or it can hand you a self-contained token that carries the claims and a signature — no lookup needed, which is why it scales, but the server has now given away a statement it cannot take back before expiry. Most modern stacks pick the second and then spend their effort managing that consequence.' },
+      { h: 'Four things decide whether a session is safe', p: 'How it is bound (a cookie with HttpOnly, Secure and SameSite, or a token bound to a key), how long it lives, how it is renewed — a refresh that rotates, so a stolen refresh token is detectable when it is replayed — and how it ends: logout, idle timeout, and an absolute lifetime. Getting one right and the other three wrong is the usual shape of a session bug.' },
+      { h: 'Revocation latency is the real exposure', p: 'Revoking access is not instant. There is a gap between disabling an account and the last valid token expiring, and inside that gap the credential still works. That window is the number worth knowing: a one-hour access token means up to an hour of access after you thought you had cut it off. Short lifetimes and rotation shrink the window; token introspection or a push signal like the OpenID Shared Signals Framework closes it, at the cost of a live dependency.' },
+      { h: 'Bearer tokens are cash; sender-constrained tokens are not', p: 'A bearer token grants access to whoever holds it — steal it and you are indistinguishable from the user. Sender-constrained tokens bind the token to a key the caller must prove it holds on every request: DPoP (RFC 9449) with a proof signature, or mTLS-bound tokens (RFC 8705) with a client certificate. A stolen token without the matching key is inert — the same idea as PKCE, applied to the token instead of the code.' },
+      { h: 'The receiver has to actually check', p: 'A signature only helps if someone verifies it, and verification means more than "does it parse". Check the signature against the expected key, the issuer, the audience, the expiry, and the algorithm — reject alg "none", and reject a key that has no business signing for this audience. A token validly signed by the wrong issuer and accepted anyway is not a broken token. It is a broken door.' },
+    ],
+    flow: [
+      { label: 'Authenticate', sub: 'once' },
+      { label: 'Issue', sub: 'session or token' },
+      { label: 'Present', sub: 'every request' },
+      { label: 'Renew', sub: 'rotate' },
+      { label: 'Revoke', sub: 'mind the gap' },
+    ],
+    code: {
+      label: 'in practice — validating a token, not just parsing it',
+      body: `# Wrong: the token parses, therefore we trust it.
+claims = jwt.decode(token, options={"verify_signature": False})   # never
+user = claims["sub"]
+
+# Right: every field the token's authority rests on is checked.
+claims = jwt.decode(
+    token,
+    key=jwks.get_signing_key(kid).key,   # a key this issuer is allowed to use
+    algorithms=["RS256"],                # pinned — never trust the header's alg
+    issuer="https://idp.example.com/",   # who minted it
+    audience="https://api.example.com/", # who it was minted FOR
+)                                        # exp / nbf verified by default
+
+# Still not done: a valid signature says nothing about revocation.
+if store.is_revoked(claims["jti"]):
+    raise Unauthorized("token revoked before expiry")`,
+    },
+    agentTwist: 'Agents hold credentials for long unattended stretches and hand them down to sub-agents, so revocation latency stops being a footnote and becomes the blast radius: the question is not whether you can revoke an agent, but how much it can still do in the minutes after you did. That argues for short-lived, sender-constrained, narrowly-scoped tokens issued per task rather than a standing credential in a config file — and for the delegation chain to travel inside the token, so a resource can refuse the whole branch at once.',
+    related: [
+      { to: '/learn/tokens-oauth', label: 'Tokens, OAuth & OIDC' },
+      { to: '/learn/audit-forensics', label: 'Audit & forensics' },
+      { to: '/learn/agent-delegation', label: 'Agent delegation' },
+    ],
+    quiz: [
+      { q: 'Why can a self-contained token be harder to revoke than a server-side session?', options: ['It is encrypted', 'There is no server record to delete — it stays valid until it expires', 'It is longer'], answer: 1, explain: 'The point of a self-contained token is that no lookup is needed, which also means there is nothing to delete.' },
+      { q: '"Revocation latency" is…', options: ['How long the revoke API call takes', 'The gap between revoking access and the last valid credential expiring', 'The time taken to detect a breach'], answer: 1, explain: 'Access keeps working inside that window, which is why token lifetime is a security parameter.' },
+      { q: 'A stolen DPoP-bound token is useless to an attacker because…', options: ['It is single-use', 'They also need the private key it is bound to', 'It expires in one second'], answer: 1, explain: 'Sender-constrained tokens require proof of possession on every request, so holding the token is not enough.' },
+    ],
+  },
+  {
     slug: 'mfa', icon: '🔐', level: 'Foundation',
     title: 'MFA & step-up authentication',
     tldr: 'Multi-factor auth requires more than one proof of identity. Step-up adds a fresh check right before a risky action.',
@@ -587,6 +703,35 @@ $ grpcurl -unix /run/spire/agent.sock \\
     ],
   },
   {
+    slug: 'audit-forensics', icon: '🧾', level: 'Foundation',
+    title: 'Audit, logging & forensics',
+    tldr: 'Every access decision is a record you might need later. What you can investigate after an incident was decided long before it — by what you chose to collect, and what you were allowed to.',
+    sections: [
+      { h: 'Identity events come from everywhere, and investigators are not the only readers', p: 'Sign-ins, directory changes, consent grants, token issuance, policy decisions and admin actions are produced by different systems and land in one pipeline. Security investigation is only one consumer of it — compliance reporting, access reviews, billing and product analytics read the same stream and want different fields and different retention. Designing the pipeline for investigation alone is how teams end up with logs nobody can afford to keep.' },
+      { h: 'What a good identity record contains', p: 'Who acted, what they did, when, from where, on whose behalf, what the decision was, and why — plus a correlation id that stitches one login to the twenty downstream calls it caused. The "why" is the field most often missing and most often needed: a log that says "denied" without the rule that denied it turns every investigation into a re-derivation.' },
+      { h: 'There is no single logging standard, and that is a procurement question', p: 'Each layer brings its own: syslog and CEF at the infrastructure edge, OpenTelemetry for traces, cloud-provider audit schemas for control-plane actions, SCIM events for lifecycle changes, and vendor-specific formats for the identity provider itself. Nothing normalizes them for you. When evaluating a platform, "which events, in what schema, retained how long, exportable how" is a sharper question than "do you have audit logs".' },
+      { h: 'Retention is tiered because storage is not free', p: 'Hot storage answers this week’s questions in seconds; warm holds months at query latency; cold is cheap archive you restore under subpoena. The trap is choosing tiers on cost alone and finding the window you kept is shorter than the time it takes to notice a breach — typically measured in months, not days. Authentication failures, privilege changes and consent grants are the categories worth keeping longest.' },
+      { h: 'You can only investigate what you were permitted to collect', p: 'In the Storm-0558 intrusion, the victim that discovered the campaign did so using a mailbox-access log available only in a higher-priced licence tier; organizations without it could not have seen the same activity in their own tenants. After public pressure the vendor made the expanded logs available at every tier and doubled the default retention. The control that mattered was not a preventive one — read the case file.' },
+    ],
+    flow: [
+      { label: 'Emit', sub: 'decision + reason' },
+      { label: 'Collect', sub: 'one pipeline' },
+      { label: 'Retain', sub: 'hot / warm / cold' },
+      { label: 'Investigate', sub: 'correlate' },
+    ],
+    agentTwist: 'An agent multiplies events — one human instruction becomes hundreds of tool calls — and it acts on behalf of someone, so a log line naming only the agent answers the wrong question. The record has to carry the actor chain (the token’s act claim is exactly this) so you can ask "what did this agent do, for which user, under whose authority" and get an answer. Without it, attribution stops at the service account, and so does the investigation.',
+    related: [
+      { to: '/learn/sessions-tokens', label: 'Sessions, tokens & revocation' },
+      { to: '/cases', label: 'Case files' },
+      { to: '/compare', label: 'Audit in the comparison' },
+    ],
+    quiz: [
+      { q: 'Which field is most often missing from an identity log and most needed in an investigation?', options: ['The timestamp', 'The reason for the decision', 'The user agent'], answer: 1, explain: 'A bare "allowed" or "denied" forces the investigator to re-derive why, months later, from a policy that may since have changed.' },
+      { q: 'Why does a correlation id matter?', options: ['It compresses the log', 'It stitches one login to the downstream calls it caused', 'It encrypts the record'], answer: 1, explain: 'Without it, one session’s activity is scattered across systems with no way to reassemble it.' },
+      { q: 'The logging lesson of Storm-0558 is that…', options: ['Logs should be encrypted', 'Detection capability can sit behind a licence tier', 'Logs should be kept forever'], answer: 1, explain: 'The victim detected it through a mailbox-access log that required a premium tier; others could not have seen the same activity.' },
+    ],
+  },
+  {
     slug: 'nhi', icon: '🤖', level: 'Foundation',
     title: 'Non-human identities (NHIs)',
     tldr: 'Most identities are not people — they are service accounts, API keys, workloads, and now agents. They outnumber humans 100:1+ and are a top breach vector.',
@@ -646,6 +791,11 @@ export const STANDARDS = [
   { name: 'RFC 8707 — Resource Indicators', status: 'RFC (2020)', track: 'enterprise', what: 'Bind a token to a specific audience/resource, limiting where it can be replayed.' },
   { name: 'OAuth on-behalf-of user (AI agents)', status: 'IETF draft · 2025', track: 'agentic', what: 'Adds act / requested_actor / actor_token so a token carries the user → agent delegation chain.' },
   { name: 'MCP Authorization', status: 'spec · 2025-11', track: 'agentic', what: 'An OAuth 2.1 profile for the Model Context Protocol — how agent clients get scoped access to tools and servers.' },
+  { name: 'NIST SP 800-63A — Identity Proofing', status: 'established', track: 'enterprise', what: 'Assurance levels (IAL1-3) for how strongly a real person was bound to an account at enrollment.' },
+  { name: 'ISO/IEC 30107-3 — Presentation Attack Detection', status: 'established', track: 'enterprise', what: 'How liveness/anti-spoof systems are tested — and why injection attacks fall outside what it measures.' },
+  { name: 'RFC 9449 — DPoP', status: 'RFC (2023)', track: 'both', what: 'Proof-of-possession for OAuth tokens: binds a token to a key so a stolen one cannot be replayed.' },
+  { name: 'RFC 8705 — mTLS-bound tokens', status: 'RFC (2020)', track: 'enterprise', what: 'Binds an access token to the client certificate it was issued to — the other route to sender-constrained tokens.' },
+  { name: 'OpenID Shared Signals Framework', status: 'established', track: 'both', what: 'Push signals (CAEP) so a session can be ended across relying parties instead of waiting for a token to expire.' },
   { name: 'SPIFFE / SPIRE', status: 'CNCF', track: 'enterprise', what: 'Verifiable, short-lived workload identity (SVIDs) without stored secrets.' },
   { name: 'NIST AI Agent Standards Initiative', status: 'launched · Feb 2026', track: 'agentic', what: 'Early US-government work toward governing autonomous-agent identity and action.' },
 ]
@@ -655,10 +805,23 @@ export const STANDARDS_SOURCES = [
   { label: 'Model Context Protocol — Authorization', url: 'https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization' },
   { label: 'RFC 8693 — OAuth 2.0 Token Exchange', url: 'https://www.rfc-editor.org/rfc/rfc8693' },
   { label: 'SPIFFE — Secure Production Identity Framework', url: 'https://spiffe.io/' },
+  { label: 'NIST SP 800-63A — Identity Proofing & Enrollment', url: 'https://pages.nist.gov/800-63-3/sp800-63a.html' },
+  { label: 'ICAO Doc 9303 — Machine Readable Travel Documents', url: 'https://www.icao.int/publications/pages/publication.aspx?docnum=9303' },
+  { label: 'RFC 9449 — OAuth 2.0 Demonstrating Proof of Possession (DPoP)', url: 'https://www.rfc-editor.org/rfc/rfc9449' },
+  { label: 'CSRB — Review of the Summer 2023 Microsoft Exchange Online Intrusion', url: 'https://www.cisa.gov/sites/default/files/2025-03/CSRBReviewOfTheSummer2023MEOIntrusion508.pdf' },
 ]
 
 // ── Case files: learn from real (and representative) failures ───────────────
 export const CASES = [
+  {
+    id: 'storm-0558', icon: '🗝️', title: 'The forged token, and the log you had to pay for', year: '2023',
+    severity: 'real incident',
+    what: 'From 15 May 2023, the actor tracked as Storm-0558 forged authentication tokens using a 2016 Microsoft consumer (MSA) signing key that had leaked into a corporate crash dump. A separate validation flaw let that consumer key be accepted for enterprise accounts, so a key that should only ever have signed for consumer mailboxes could mint tokens for government tenants. Around 25 organizations were affected; roughly 60,000 emails were downloaded from the State Department alone, over at least six weeks. The State Department found it on 15 June 2023 with a custom rule over the MailItemsAccessed mailbox-auditing log — a log it had only because it held a licence tier including Purview Audit (Premium). The Cyber Safety Review Board called the intrusion preventable and the vendor’s security culture inadequate; the vendor still does not know how the key was stolen. In February 2024 it made the expanded logs available at every tier and raised default retention from 90 to 180 days.',
+    identity: 'A signing key is the root of an identity system’s trust. One leaked key plus a validation gap meant tokens for any user could be minted at will — and nothing downstream could tell a forged-but-validly-signed token from a real one, because the signature was genuine.',
+    stopper: 'On prevention: strict issuer and audience validation, so a consumer key is refused for an enterprise tenant no matter how good the signature, plus key isolation and rotation that assumes a key will eventually leak. On detection: the mailbox-access log — the only reason anyone noticed. That control was a paid add-on, which is the uncomfortable part.',
+    era: 'Era 4 — cloud & federation', maps: 'Audit & redaction / token validation',
+    source: 'https://www.cisa.gov/sites/default/files/2025-03/CSRBReviewOfTheSummer2023MEOIntrusion508.pdf',
+  },
   {
     id: 'salesloft-drift', icon: '🔓', title: 'The Salesloft–Drift OAuth-token breach', year: '2025',
     severity: 'real incident',
@@ -720,9 +883,11 @@ export const LEARNING_PATHS = [
   {
     id: 'new-iam', icon: '🌱', title: 'New to IAM', who: 'Start from zero — what identity even means.',
     steps: [
+      { to: '/learn/identity-proofing', label: 'Identity proofing & eKYC' },
       { to: '/learn/authn-vs-authz', label: 'AuthN vs AuthZ' },
       { to: '/learn/access-models', label: 'Access models' },
       { to: '/learn/tokens-oauth', label: 'Tokens, OAuth & OIDC' },
+      { to: '/learn/sessions-tokens', label: 'Sessions & revocation' },
       { to: '/learn/zero-trust', label: 'Zero Trust' },
       { to: '/journey', label: 'The journey of IAM' },
     ],
@@ -743,6 +908,7 @@ export const LEARNING_PATHS = [
       { to: '/compare', label: 'IAM diff & control matrix' },
       { to: '/topology', label: 'Enforcement topology' },
       { to: '/playground', label: 'Config posture' },
+      { to: '/learn/audit-forensics', label: 'Audit & forensics' },
       { to: '/cases', label: 'Case files' },
       { to: '/quiz', label: 'Test yourself' },
     ],
